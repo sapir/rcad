@@ -39,7 +39,7 @@ class HexNut < BaseBoltPart
         d = nut_dia_across_corners + @xytol
         h = nut_height + @ztol
 
-        nut = reg_prism(6, d, h)
+        nut = reg_prism(6, d / 2.0, h)
         
         if full
             return nut
