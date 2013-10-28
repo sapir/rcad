@@ -173,6 +173,16 @@ class Text < Shape
 end
 
 
+class Box < Shape
+  attr_accessor :xsize, :ysize, :zsize
+
+  def initialize(xsize, ysize, zsize)
+    @xsize = xsize
+    @ysize = ysize
+    @zsize = zsize
+  end
+end
+
 class Cube < Box
   def initialize(size)
     super(size, size, size)

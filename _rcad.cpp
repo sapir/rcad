@@ -170,14 +170,13 @@ void polygon_initialize(Object self, Array points, Object paths)
 }
 
 
-void box_initialize(Object self, double xsize, double ysize, double zsize)
+Object box_render(Object self)
 {
-    self.iv_set("@xsize", xsize);
-    self.iv_set("@ysize", ysize);
-    self.iv_set("@zsize", zsize);
+    Standard_Real xsize = from_ruby<Standard_Real>(self.iv_get("@xsize"));
+    Standard_Real ysize = from_ruby<Standard_Real>(self.iv_get("@zsize"));
+    Standard_Real zsize = from_ruby<Standard_Real>(self.iv_get("@ysize"));
 
-    self.iv_set("@shape",
-        BRepPrimAPI_MakeBox(xsize, ysize, zsize).Shape());
+    return to_ruby(BRepPrimAPI_MakeBox(xsize, ysize, zsize).Shape());
 }
 
 
@@ -314,7 +313,7 @@ void Init__rcad()
 
     Class rb_cBox = define_class("Box", rb_cShape)
         .add_handler<Standard_Failure>(translate_oce_exception)
-        .define_method("initialize", &box_initialize);
+        .define_method("render", &box_render);
 
     Class rb_cCylinder = define_class("Cylinder", rb_cShape)
         .add_handler<Standard_Failure>(translate_oce_exception)
