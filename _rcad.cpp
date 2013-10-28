@@ -188,7 +188,7 @@ Object cylinder_render(Object self)
 }
 
 
-Object shape_render(Object self)
+Object sphere_render(Object self)
 {
     Standard_Real dia = from_ruby<Standard_Real>(self.iv_get("@dia"));
     return to_ruby(BRepPrimAPI_MakeSphere(dia / 2.0).Shape());
@@ -298,9 +298,9 @@ void Init__rcad()
         .add_handler<Standard_Failure>(translate_oce_exception)
         .define_method("render", &cylinder_render);
 
-    Class rb_cShape = define_class("Shape", rb_cShape)
+    Class rb_cSphere = define_class("Sphere", rb_cShape)
         .add_handler<Standard_Failure>(translate_oce_exception)
-        .define_method("render", &shape_render);
+        .define_method("render", &sphere_render);
 
     Class rb_cCombination = define_class("Combination", rb_cShape)
         .add_handler<Standard_Failure>(translate_oce_exception)
