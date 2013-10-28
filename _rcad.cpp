@@ -32,18 +32,22 @@ void translate_oce_exception(const Standard_Failure &e)
 }
 
 
-void shape_write_stl(Object self, String path)
+static Data_Object<TopoDS_Shape> render_shape(Object shape)
 {
-    Object shape_obj = self;
     do {
-        shape_obj = shape_obj.call("render");
-    } while (shape_obj.is_a(rb_cShape));
+        shape = shape.call("render");
+    } while (shape.is_a(rb_cShape));
     
-    if (shape_obj.is_nil()) {
+    if (shape.is_nil()) {
         throw Exception(rb_eArgError, "render returned nil");
     }
 
-    Data_Object<TopoDS_Shape> shape(shape_obj);
+    return shape;
+}
+
+void shape_write_stl(Object self, String path)
+{
+    Data_Object<TopoDS_Shape> shape = render_shape(self);
 
     StlAPI_Writer writer;
     writer.ASCIIMode() = false;
@@ -114,8 +118,8 @@ void combination_initialize(Object self, Object a, Object b)
 
 Object union_render(Object self)
 {
-    Data_Object<TopoDS_Shape> shape_a = self.iv_get("@a").call("render");
-    Data_Object<TopoDS_Shape> shape_b = self.iv_get("@b").call("render");
+    Data_Object<TopoDS_Shape> shape_a = render_shape(self.iv_get("@a"));
+    Data_Object<TopoDS_Shape> shape_b = render_shape(self.iv_get("@b"));
     return to_ruby(
         BRepAlgoAPI_Fuse(*shape_a, *shape_b).Shape());
 }
@@ -123,8 +127,8 @@ Object union_render(Object self)
 
 Object difference_render(Object self)
 {
-    Data_Object<TopoDS_Shape> shape_a = self.iv_get("@a").call("render");
-    Data_Object<TopoDS_Shape> shape_b = self.iv_get("@b").call("render");
+    Data_Object<TopoDS_Shape> shape_a = render_shape(self.iv_get("@a"));
+    Data_Object<TopoDS_Shape> shape_b = render_shape(self.iv_get("@b"));
     return to_ruby(
         BRepAlgoAPI_Cut(*shape_a, *shape_b).Shape());
 }
@@ -132,8 +136,8 @@ Object difference_render(Object self)
 
 Object intersection_render(Object self)
 {
-    Data_Object<TopoDS_Shape> shape_a = self.iv_get("@a").call("render");
-    Data_Object<TopoDS_Shape> shape_b = self.iv_get("@b").call("render");
+    Data_Object<TopoDS_Shape> shape_a = render_shape(self.iv_get("@a"));
+    Data_Object<TopoDS_Shape> shape_b = render_shape(self.iv_get("@b"));
     return to_ruby(
         BRepAlgoAPI_Common(*shape_a, *shape_b).Shape());
 }
@@ -146,7 +150,7 @@ Object linear_extrusion_render(Object self)
     Standard_Real height = from_ruby<Standard_Real>(self.iv_get("@height"));
     Standard_Real twist = from_ruby<Standard_Real>(self.iv_get("@twist"));
 
-    Data_Object<TopoDS_Shape> shape = profile.call("render");
+    Data_Object<TopoDS_Shape> shape = render_shape(profile);
 
     if (0 == twist) {
         return to_ruby(
