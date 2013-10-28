@@ -181,8 +181,15 @@ end
 
 
 class Cylinder < Shape
+  attr_accessor :height, :dia
+
   def initialize(height, dia)
-    @shape = nil    # TODO
+    @height = height
+    @dia = dia
+  end
+
+  def radius
+    dia / 2.0
   end
 end
 
