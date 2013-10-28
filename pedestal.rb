@@ -9,5 +9,5 @@ pedestal = base
     .add(base.move_z(3.cm + 7.cm))
 
 pedestal
-  .rotate_z(45)
+  .rot_z(45)
   .write_stl("pedestal.stl")
