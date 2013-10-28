@@ -31,15 +31,15 @@ class Shape
   end
 
   def add(shape)
-    Shape.new   # TODO
+    Union.new(self, shape)
   end
 
   def sub(shape)
-    Shape.new   # TODO
+    Difference.new(self, shape)
   end
 
   def mul(shape)
-    Shape.new   # TODO
+    Intersection.new(self, shape)
   end
 
   def move(x, y, z)
@@ -91,11 +91,11 @@ class Shape
   end
 
   def extrude(height, twist=0)
-    Shape.new   # TODO
+    LinearExtrusion.new(self, height, twist)
   end
 
-  def revolve(...)
-    Shape.new   # TODO
+  def revolve(angle=360)
+    Revolution.new(self, angle)
   end
 
   def bbox
