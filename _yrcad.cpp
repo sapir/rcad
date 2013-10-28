@@ -1,6 +1,8 @@
 #include <gp_Pnt2d.hxx>
 #include <gp_Pnt.hxx>
+#include <gp_Vec.hxx>
 #include <BRepPrimAPI_MakeBox.hxx>
+#include <BRepPrimAPI_MakePrism.hxx>
 #include <BRepAlgoAPI_Fuse.hxx>
 #include <BRepAlgoAPI_Cut.hxx>
 #include <BRepAlgoAPI_Common.hxx>
@@ -137,6 +139,24 @@ Object intersection_render(Object self)
 }
 
 
+// initialize is defined in Ruby code
+void linear_extrusion_render(Object self)
+{
+    Object profile = self.iv_get("@profile");
+    Standard_Real height = from_ruby<Standard_Real>(self.iv_get("@height"));
+    Standard_Real twist = from_ruby<Standard_Real>(self.iv_get("@twist"));
+
+    Data_Object<TopoDS_Shape> shape = profile.call("render");
+
+    if (0 == twist) {
+        self.iv_set("@shape",
+            BRepPrimAPI_MakePrism(*shape, gp_Vec(0, 0, height), true).Shape());
+    } else {
+        // TODO
+    }
+}
+
+
 extern "C"
 void Init__yrcad()
 {
@@ -168,4 +188,7 @@ void Init__yrcad()
 
     Class rb_cIntersection = define_class("Intersection", rb_cCombination)
         .define_method("render", &intersection_render);
+
+    Class rb_cLinearExtrusion = define_class("LinearExtrusion", rb_cShape)
+        .define_method("render", &linear_extrusion_render);
 }
