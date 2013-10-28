@@ -185,9 +185,15 @@ class Text < Shape
 end
 
 
-class Cube < Shape
-  def initialize(size)
+class Box < Shape
+  def initialize(xsize, ysize, zsize)
     @shape = nil    # TODO
+  end
+end
+
+class Cube < Box
+  def initialize(size)
+    super(size, size, size)
   end
 end
 
@@ -290,6 +296,7 @@ square = Square.method(:new)
 circle = Circle.method(:new)
 text = Text.method(:new)
 
+box = Box.method(:new)
 cube = Cube.method(:new)
 cylinder = Cylinder.method(:new)
 sphere = Sphere.method(:new)
