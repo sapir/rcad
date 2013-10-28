@@ -3,6 +3,7 @@
 #include <gp_Vec.hxx>
 #include <BRepPrimAPI_MakeBox.hxx>
 #include <BRepPrimAPI_MakeCylinder.hxx>
+#include <BRepPrimAPI_MakeSphere.hxx>
 #include <BRepPrimAPI_MakePrism.hxx>
 #include <BRepPrimAPI_MakeRevol.hxx>
 #include <BRepAlgoAPI_Fuse.hxx>
@@ -146,6 +147,13 @@ Object cylinder_render(Object self)
 }
 
 
+Object shape_render(Object self)
+{
+    Standard_Real dia = from_ruby<Standard_Real>(self.iv_get("@dia"));
+    return to_ruby(BRepPrimAPI_MakeSphere(dia / 2.0).Shape());
+}
+
+
 void combination_initialize(Object self, Object a, Object b)
 {
     self.iv_set("@a", a);
@@ -248,6 +256,10 @@ void Init__rcad()
     Class rb_cCylinder = define_class("Cylinder", rb_cShape)
         .add_handler<Standard_Failure>(translate_oce_exception)
         .define_method("render", &cylinder_render);
+
+    Class rb_cShape = define_class("Shape", rb_cShape)
+        .add_handler<Standard_Failure>(translate_oce_exception)
+        .define_method("render", &shape_render);
 
     Class rb_cCombination = define_class("Combination", rb_cShape)
         .add_handler<Standard_Failure>(translate_oce_exception)

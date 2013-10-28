@@ -195,8 +195,14 @@ end
 
 
 class Sphere < Shape
+  attr_accessor :dia
+
   def initialize(dia)
-    @shape = nil    # TODO
+    @dia = dia
+  end
+
+  def radius
+    dia / 2.0
   end
 end
 
