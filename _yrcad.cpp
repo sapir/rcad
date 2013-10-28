@@ -89,7 +89,7 @@ void polygon_initialize(Object self, Array points, Object paths)
         self.iv_set("@shape",
             BRepBuilderAPI_MakeFace(wire_maker.Wire()).Shape());
     } else {
-        // :(
+        // TODO
     }
 }
 
