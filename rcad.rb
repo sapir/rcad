@@ -215,8 +215,20 @@ end
 
 
 class Torus < Shape
-  def initialize(dia1, dia2)
-    @shape = nil    # TODO
+  attr_accessor :inner_dia, :outer_dia, :angle
+
+  def initialize(inner_dia, outer_dia, angle=nil)
+    @inner_dia = inner_dia
+    @outer_dia = outer_dia
+    @angle = angle
+  end
+
+  def inner_radius
+    inner_dia / 2.0
+  end
+
+  def outer_radius
+    outer_dia / 2.0
   end
 end
 

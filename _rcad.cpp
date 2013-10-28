@@ -4,6 +4,7 @@
 #include <BRepPrimAPI_MakeBox.hxx>
 #include <BRepPrimAPI_MakeCylinder.hxx>
 #include <BRepPrimAPI_MakeSphere.hxx>
+#include <BRepPrimAPI_MakeTorus.hxx>
 #include <BRepPrimAPI_MakePrism.hxx>
 #include <BRepPrimAPI_MakeRevol.hxx>
 #include <BRepAlgoAPI_Fuse.hxx>
@@ -195,6 +196,27 @@ Object sphere_render(Object self)
 }
 
 
+Object torus_render(Object self)
+{
+    Standard_Real inner_dia = from_ruby<Standard_Real>(
+        self.iv_get("@inner_dia"));
+    
+    Standard_Real outer_dia = from_ruby<Standard_Real>(
+        self.iv_get("@outer_dia"));
+
+    Standard_Real r1 = inner_dia / 2.0;
+    Standard_Real r2 = outer_dia / 2.0;
+
+    Object angle = self.iv_get("@angle");
+    if (angle.is_nil()) {
+        return to_ruby(BRepPrimAPI_MakeTorus(r1, r2).Shape());
+    } else {
+        Standard_Real angle_num = from_ruby<Standard_Real>(angle);
+        return to_ruby(BRepPrimAPI_MakeTorus(r1, r2, angle_num).Shape());
+    }
+}
+
+
 void combination_initialize(Object self, Object a, Object b)
 {
     self.iv_set("@a", a);
@@ -301,6 +323,10 @@ void Init__rcad()
     Class rb_cSphere = define_class("Sphere", rb_cShape)
         .add_handler<Standard_Failure>(translate_oce_exception)
         .define_method("render", &sphere_render);
+
+    Class rb_cTorus = define_class("Torus", rb_cShape)
+        .add_handler<Standard_Failure>(translate_oce_exception)
+        .define_method("render", &torus_render);
 
     Class rb_cCombination = define_class("Combination", rb_cShape)
         .add_handler<Standard_Failure>(translate_oce_exception)
