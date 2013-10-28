@@ -87,15 +87,18 @@ static Data_Object<TopoDS_Shape> render_shape(Object shape)
     return shape;
 }
 
+static Object wrap_rendered_shape(const TopoDS_Shape &shape)
+{
+    Object shape_obj = rb_cShape.call("new");
+    shape_obj.iv_set("@shape", to_ruby(shape));
+    return shape_obj;
+}
+
 static Object shape_transform(Object self, const gp_Trsf &transform)
 {
     Data_Object<TopoDS_Shape> rendered = render_shape(self);
-    TopoDS_Shape new_shape(
+    return wrap_rendered_shape(
         BRepBuilderAPI_Transform(*rendered, transform, Standard_True).Shape());
-
-    Object shape_obj = rb_cShape.call("new");
-    shape_obj.iv_set("@shape", to_ruby(new_shape));
-    return shape_obj;
 }
 
 Object shape_move(Object self, Standard_Real x, Standard_Real y,
