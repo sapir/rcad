@@ -219,8 +219,6 @@ class LinearExtrusion < Shape
     @profile = profile
     @height = height
     @twist = twist
-
-    @shape = nil    # TODO
   end
 end
 
