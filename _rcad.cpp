@@ -15,6 +15,7 @@
 #include <BRepBuilderAPI_MakeWire.hxx>
 #include <BRepBuilderAPI_MakeFace.hxx>
 #include <BRepBuilderAPI_Transform.hxx>
+#include <BRepBuilderAPI_GTransform.hxx>
 #include <StlAPI_Writer.hxx>
 #include <Standard_Failure.hxx>
 #include <rice/Class.hpp>
@@ -119,7 +120,15 @@ Object shape_rotate(Object self, Standard_Real angle, gp_Dir axis)
 Object shape_scale(Object self, Standard_Real x, Standard_Real y,
     Standard_Real z)
 {
-    return self;
+    gp_GTrsf transform;
+    transform.SetVectorialPart(
+        gp_Mat(x, 0, 0,
+               0, y, 0,
+               0, 0, z));
+
+    Data_Object<TopoDS_Shape> rendered = render_shape(self);
+    return wrap_rendered_shape(
+        BRepBuilderAPI_GTransform(*rendered, transform, Standard_True).Shape());
 }
 
 void shape_write_stl(Object self, String path)
