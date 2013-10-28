@@ -219,27 +219,6 @@ class Torus < Shape
 end
 
 
-class Union < Shape
-  def initialize(a, b)
-    @shape = nil    # TODO
-  end
-end
-
-
-class Difference < Shape
-  def initialize(a, b)
-    @shape = nil    # TODO
-  end
-end
-
-
-class Intersection < Shape
-  def initialize(a, b)
-    @shape = nil    # TODO
-  end
-end
-
-
 class LinearExtrusion < Shape
   attr_reader :profile, :height
 

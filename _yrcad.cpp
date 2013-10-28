@@ -1,4 +1,7 @@
 #include <BRepPrimAPI_MakeBox.hxx>
+#include <BRepAlgoAPI_Fuse.hxx>
+#include <BRepAlgoAPI_Cut.hxx>
+#include <BRepAlgoAPI_Common.hxx>
 #include <StlAPI_Writer.hxx>
 #include <Standard_Failure.hxx>
 #include <rice/Class.hpp>
@@ -40,10 +43,37 @@ void box_initialize(Object self, double xsize, double ysize, double zsize)
 }
 
 
-void union_initialize(Object self, Object a, Object b)
+void combination_initialize(Object self, Object a, Object b)
 {
     self.iv_set("@a", a);
     self.iv_set("@b", b);
+}
+
+
+Object union_render(Object self)
+{
+    Data_Object<TopoDS_Shape> shape_a = self.iv_get("@a").call("render");
+    Data_Object<TopoDS_Shape> shape_b = self.iv_get("@b").call("render");
+    return to_ruby(
+        BRepAlgoAPI_Fuse(*shape_a, *shape_b).Shape());
+}
+
+
+Object difference_render(Object self)
+{
+    Data_Object<TopoDS_Shape> shape_a = self.iv_get("@a").call("render");
+    Data_Object<TopoDS_Shape> shape_b = self.iv_get("@b").call("render");
+    return to_ruby(
+        BRepAlgoAPI_Cut(*shape_a, *shape_b).Shape());
+}
+
+
+Object intersection_render(Object self)
+{
+    Data_Object<TopoDS_Shape> shape_a = self.iv_get("@a").call("render");
+    Data_Object<TopoDS_Shape> shape_b = self.iv_get("@b").call("render");
+    return to_ruby(
+        BRepAlgoAPI_Common(*shape_a, *shape_b).Shape());
 }
 
 
@@ -63,6 +93,15 @@ void Init__yrcad()
     Class rb_cBox = define_class("Box", rb_cShape)
         .define_method("initialize", &box_initialize);
 
-    Class rb_cUnion = define_class("Union", rb_cShape)
-        .define_method("initialize", &union_initialize);
+    Class rb_cCombination = define_class("Combination", rb_cShape)
+        .define_method("initialize", &combination_initialize);
+
+    Class rb_cUnion = define_class("Union", rb_cCombination)
+        .define_method("render", &union_render);
+
+    Class rb_cDifference = define_class("Difference", rb_cCombination)
+        .define_method("render", &difference_render);
+
+    Class rb_cIntersection = define_class("Intersection", rb_cCombination)
+        .define_method("render", &intersection_render);
 }
