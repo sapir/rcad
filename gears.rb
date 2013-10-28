@@ -77,15 +77,19 @@ class GearProfile < Shape
     half_t_angle = Math::atan(tooth_thickness / 2 / (pitch_dia / 2))
     half_t_tip_angle = Math::atan(tooth_tip_thickness / 2 / (outer_dia / 2))
 
+    root_r = root_dia / 2
+    pitch_r = pitch_dia / 2
+    outer_r = outer_dia / 2
+
     points = []
     (1..num_teeth).each do |i|
       angle = (360.0 / num_teeth) * i
-      points << to_polar(root_dia / 2, angle - half_t_root_angle)
-      points << to_polar(pitch_dia / 2, angle - half_t_angle)
-      points << to_polar(outer_dia / 2, angle - half_t_tip_angle)
-      points << to_polar(outer_dia / 2, angle + half_t_tip_angle)
-      points << to_polar(pitch_dia / 2, angle + half_t_angle)
-      points << to_polar(root_dia / 2, angle + half_t_root_angle)
+      points << to_polar(root_r, angle - half_t_root_angle)
+      points << to_polar(pitch_r, angle - half_t_angle)
+      points << to_polar(outer_r, angle - half_t_tip_angle)
+      points << to_polar(outer_r, angle + half_t_tip_angle)
+      points << to_polar(pitch_r, angle + half_t_angle)
+      points << to_polar(root_r, angle + half_t_root_angle)
     end
 
     polygon(points)
