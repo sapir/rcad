@@ -282,3 +282,17 @@ end
 def read_stl(path)
   nil   # TODO
 end
+
+
+polygon = Polygon.method(:new)
+reg_poly = RegularPolygon.method(:new)
+square = Square.method(:new)
+circle = Circle.method(:new)
+text = Text.method(:new)
+
+cube = Cube.method(:new)
+cylinder = Cylinder.method(:new)
+sphere = Sphere.method(:new)
+polyhedron = Polyhedron.method(:new)
+torus = Torus.method(:new)
+reg_prism = RegularPrism.method(:new)
