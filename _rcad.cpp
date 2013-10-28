@@ -87,12 +87,8 @@ static Data_Object<TopoDS_Shape> render_shape(Object shape)
     return shape;
 }
 
-Object shape_move(Object self, Standard_Real x, Standard_Real y,
-    Standard_Real z)
+static Object shape_transform(Object self, const gp_Trsf &transform)
 {
-    gp_Trsf transform;
-    transform.SetTranslation(gp_Vec(x, y, z));
-
     Data_Object<TopoDS_Shape> rendered = render_shape(self);
     TopoDS_Shape new_shape(
         BRepBuilderAPI_Transform(*rendered, transform, Standard_True).Shape());
@@ -102,9 +98,19 @@ Object shape_move(Object self, Standard_Real x, Standard_Real y,
     return shape_obj;
 }
 
-Object shape_rotate(Object self, Standard_Real angle, Array axis)
+Object shape_move(Object self, Standard_Real x, Standard_Real y,
+    Standard_Real z)
 {
-    return self;
+    gp_Trsf transform;
+    transform.SetTranslation(gp_Vec(x, y, z));
+    return shape_transform(self, transform);
+}
+
+Object shape_rotate(Object self, Standard_Real angle, gp_Dir axis)
+{
+    gp_Trsf transform;
+    transform.SetRotation(gp_Ax1(gp_Pnt(), axis), angle);
+    return shape_transform(self, transform);
 }
 
 Object shape_scale(Object self, Standard_Real x, Standard_Real y,
