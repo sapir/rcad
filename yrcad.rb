@@ -173,6 +173,9 @@ end
 
 
 class Circle < Shape
+  def initialize(dia)
+    @shape = nil    # TODO
+  end
 end
 
 
