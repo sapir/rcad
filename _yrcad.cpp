@@ -1,4 +1,3 @@
-#include <BRepBuilderAPI_MakeShape.hxx>
 #include <BRepPrimAPI_MakeBox.hxx>
 #include <StlAPI_Writer.hxx>
 #include <rice/Class.hpp>
@@ -6,15 +5,15 @@
 using namespace Rice;
 
 
-void shape_write_stl(Object self, const char *path)
+void shape_write_stl(Object self, String path)
 {
     Data_Object<TopoDS_Shape> shape = self.call("render");
-    
+
     StlAPI_Writer writer;
     writer.ASCIIMode() = false;
     writer.RelativeMode() = false;
     writer.SetDeflection(0.05);     // TODO: deflection param
-    writer.Write(*shape, path);
+    writer.Write(*shape, path.c_str());
 }
 
 
