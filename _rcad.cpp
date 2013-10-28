@@ -3,6 +3,7 @@
 #include <gp_Vec.hxx>
 #include <BRepPrimAPI_MakeBox.hxx>
 #include <BRepPrimAPI_MakePrism.hxx>
+#include <BRepPrimAPI_MakeRevol.hxx>
 #include <BRepAlgoAPI_Fuse.hxx>
 #include <BRepAlgoAPI_Cut.hxx>
 #include <BRepAlgoAPI_Common.hxx>
@@ -163,6 +164,25 @@ Object linear_extrusion_render(Object self)
 }
 
 
+// initialize is defined in Ruby code
+Object revolution_render(Object self)
+{
+    Object profile = self.iv_get("@profile");
+    Data_Object<TopoDS_Shape> shape = render_shape(profile);
+    
+    Object angle = self.iv_get("@angle");
+    if (angle.is_nil()) {
+        return to_ruby(
+            BRepPrimAPI_MakeRevol(*shape, gp::OY(), Standard_True).Shape());
+    } else {
+        Standard_Real angle_num = from_ruby<Standard_Real>(angle);
+        return to_ruby(
+            BRepPrimAPI_MakeRevol(*shape, gp::OY(), angle_num,
+                Standard_True).Shape());
+    }
+}
+
+
 extern "C"
 void Init__rcad()
 {
@@ -197,4 +217,7 @@ void Init__rcad()
 
     Class rb_cLinearExtrusion = define_class("LinearExtrusion", rb_cShape)
         .define_method("render", &linear_extrusion_render);
+
+    Class rb_cRevolution = define_class("Revolution", rb_cShape)
+        .define_method("render", &revolution_render);
 }

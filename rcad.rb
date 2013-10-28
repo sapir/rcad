@@ -234,11 +234,9 @@ end
 class Revolution < Shape
   attr_reader :profile, :angle
 
-  def initialize(profile, angle=360.deg_to_rad)
+  def initialize(profile, angle=nil)
     @profile = profile
     @angle = angle
-
-    @shape = nil    # TODO
   end
 end
 
