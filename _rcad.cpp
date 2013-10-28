@@ -17,6 +17,7 @@
 #include <BRepBuilderAPI_MakeFace.hxx>
 #include <BRepBuilderAPI_Transform.hxx>
 #include <BRepBuilderAPI_GTransform.hxx>
+#include <StlAPI_Reader.hxx>
 #include <StlAPI_Writer.hxx>
 #include <Standard_Failure.hxx>
 #include <rice/Class.hpp>
@@ -141,6 +142,15 @@ void shape_write_stl(Object self, String path)
     writer.RelativeMode() = false;
     writer.SetDeflection(0.05);     // TODO: deflection param
     writer.Write(*shape, path.c_str());
+}
+
+
+Object shape_from_stl(String path)
+{
+    TopoDS_Shape shape;
+    StlAPI_Reader reader;
+    reader.Read(shape, path.c_str());
+    return wrap_rendered_shape(shape);
 }
 
 
@@ -304,7 +314,8 @@ void Init__rcad()
         .define_method("move", &shape_move)
         .define_method("rotate", &shape_rotate)
         .define_method("scale", &shape_scale)
-        .define_method("write_stl", &shape_write_stl);
+        .define_method("write_stl", &shape_write_stl)
+        .define_module_function("from_stl", &shape_from_stl);
 
     Class rb_cPolygon = define_class("Polygon", rb_cShape)
         .add_handler<Standard_Failure>(translate_oce_exception)

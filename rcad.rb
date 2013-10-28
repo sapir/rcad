@@ -277,11 +277,6 @@ class RegularPrism < LinearExtrusion
 end
 
 
-def read_stl(path)
-  nil   # TODO
-end
-
-
 def make_maker(name, klass)
   Object.send(:define_method, name, &klass.method(:new))
 end
