@@ -181,6 +181,10 @@ class Circle < Shape
 end
 
 
+class Text < Shape
+end
+
+
 class Cube < Shape
   def initialize(size)
     @shape = nil    # TODO
@@ -199,10 +203,6 @@ class Sphere < Shape
   def initialize(dia)
     @shape = nil    # TODO
   end
-end
-
-
-class Text < Shape
 end
 
 
