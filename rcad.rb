@@ -55,10 +55,6 @@ class Shape
     Intersection.new(self, shape)
   end
 
-  def move(x, y, z)
-    Shape.new   # TODO
-  end
-
   def move_x(delta)
     move(delta, 0, 0)
   end
@@ -71,10 +67,6 @@ class Shape
     move(0, 0, delta)
   end
 
-  def rotate(angle, axis)
-    Shape.new   # TODO
-  end
-
   def rot_x(angle)
     rotate(angle, [1, 0, 0])
   end
@@ -85,10 +77,6 @@ class Shape
 
   def rot_z(angle)
     rotate(angle, [0, 0, 1])
-  end
-
-  def scale(x, y, z)
-    Shape.new   # TODO
   end
 
   def scale_x(factor)

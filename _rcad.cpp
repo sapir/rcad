@@ -12,6 +12,7 @@
 #include <BRepBuilderAPI_MakeEdge.hxx>
 #include <BRepBuilderAPI_MakeWire.hxx>
 #include <BRepBuilderAPI_MakeFace.hxx>
+#include <BRepBuilderAPI_Transform.hxx>
 #include <StlAPI_Writer.hxx>
 #include <Standard_Failure.hxx>
 #include <rice/Class.hpp>
@@ -44,6 +45,32 @@ static Data_Object<TopoDS_Shape> render_shape(Object shape)
     }
 
     return shape;
+}
+
+Object shape_move(Object self, Standard_Real x, Standard_Real y,
+    Standard_Real z)
+{
+    gp_Trsf transform;
+    transform.SetTranslation(gp_Vec(x, y, z));
+
+    Data_Object<TopoDS_Shape> rendered = render_shape(self);
+    TopoDS_Shape new_shape(
+        BRepBuilderAPI_Transform(*rendered, transform, Standard_True).Shape());
+
+    Object shape_obj = rb_cShape.call("new");
+    shape_obj.iv_set("@shape", to_ruby(new_shape));
+    return shape_obj;
+}
+
+Object shape_rotate(Object self, Standard_Real angle, Array axis)
+{
+    return self;
+}
+
+Object shape_scale(Object self, Standard_Real x, Standard_Real y,
+    Standard_Real z)
+{
+    return self;
 }
 
 void shape_write_stl(Object self, String path)
@@ -194,6 +221,9 @@ void Init__rcad()
 
     rb_cShape = define_class("Shape")
         .add_handler<Standard_Failure>(translate_oce_exception)
+        .define_method("move", &shape_move)
+        .define_method("rotate", &shape_rotate)
+        .define_method("scale", &shape_scale)
         .define_method("write_stl", &shape_write_stl);
 
     Class rb_cPolygon = define_class("Polygon", rb_cShape)
