@@ -315,7 +315,7 @@ void Init__rcad()
         .define_method("rotate", &shape_rotate)
         .define_method("scale", &shape_scale)
         .define_method("write_stl", &shape_write_stl)
-        .define_module_function("from_stl", &shape_from_stl);
+        .define_singleton_method("from_stl", &shape_from_stl);
 
     Class rb_cPolygon = define_class("Polygon", rb_cShape)
         .add_handler<Standard_Failure>(translate_oce_exception)
