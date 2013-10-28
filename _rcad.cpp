@@ -67,6 +67,12 @@ gp_Vec from_ruby<gp_Vec>(Object obj)
         from_ruby<Standard_Real>(ary[2]));
 }
 
+template<>
+gp_Dir from_ruby<gp_Dir>(Object obj)
+{
+    return gp_Dir(from_ruby<gp_Vec>(obj));
+}
+
 
 static Data_Object<TopoDS_Shape> render_shape(Object shape)
 {
