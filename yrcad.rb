@@ -30,7 +30,7 @@ TOLERANCE = 50.um
 
 class Shape
   # if @shape isn't defined in a Shape's initialize() method, then render()
-  # should be overridden to create it on-the-fly
+  # should be overridden to create and return it on-the-fly.
   def render
     @shape
   end
@@ -141,13 +141,6 @@ class Shape
 
   def z_size
     max_z - min_z
-  end
-end
-
-
-class Polygon < Shape
-  def initialize(points, paths=nil)
-    @shape = nil    # TODO
   end
 end
 

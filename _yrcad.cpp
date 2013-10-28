@@ -1,16 +1,26 @@
+#include <gp_Pnt2d.hxx>
+#include <gp_Pnt.hxx>
 #include <BRepPrimAPI_MakeBox.hxx>
 #include <BRepAlgoAPI_Fuse.hxx>
 #include <BRepAlgoAPI_Cut.hxx>
 #include <BRepAlgoAPI_Common.hxx>
+#include <BRepAlgoAPI_Common.hxx>
+#include <BRepBuilderAPI_MakeEdge2d.hxx>
+#include <BRepBuilderAPI_MakeEdge.hxx>
+#include <BRepBuilderAPI_MakeWire.hxx>
+#include <BRepBuilderAPI_MakeFace.hxx>
 #include <StlAPI_Writer.hxx>
 #include <Standard_Failure.hxx>
 #include <rice/Class.hpp>
 #include <rice/Exception.hpp>
+#include <rice/Array.hpp>
 
 using namespace Rice;
 
 
 Data_Type<Standard_Failure> rb_cOCEError;
+Class rb_cShape;
+
 
 void translate_oce_exception(const Standard_Failure &e)
 {
@@ -22,13 +32,63 @@ void translate_oce_exception(const Standard_Failure &e)
 
 void shape_write_stl(Object self, String path)
 {
-    Data_Object<TopoDS_Shape> shape = self.call("render");
+    Object shape_obj = self;
+    do {
+        shape_obj = shape_obj.call("render");
+    } while (shape_obj.is_a(rb_cShape));
+    
+    if (shape_obj.is_nil()) {
+        throw Exception(rb_eArgError, "render returned nil");
+    }
+
+    Data_Object<TopoDS_Shape> shape(shape_obj);
 
     StlAPI_Writer writer;
     writer.ASCIIMode() = false;
     writer.RelativeMode() = false;
     writer.SetDeflection(0.05);     // TODO: deflection param
     writer.Write(*shape, path.c_str());
+}
+
+
+static gp_Pnt2d from_ruby_pnt2d(Object obj)
+{
+    Array ary(obj);
+
+    if (ary.size() != 2) {
+        throw Exception(rb_eArgError,
+            "2D points must be arrays with 2 numbers each");
+    }
+
+    return gp_Pnt2d(
+        from_ruby<Standard_Real>(ary[0]),
+        from_ruby<Standard_Real>(ary[1]));
+}
+
+
+void polygon_initialize(Object self, Array points, Object paths)
+{
+    self.iv_set("@points", points);
+    self.iv_set("@paths", paths);
+
+    if (paths.is_nil()) {
+        BRepBuilderAPI_MakeWire wire_maker;
+
+        for (size_t i = 0; i < points.size(); ++i) {
+            const size_t j = (i + 1) % points.size();
+
+            gp_Pnt2d gp_p1(from_ruby_pnt2d(points[i]));
+            gp_Pnt2d gp_p2(from_ruby_pnt2d(points[j]));
+
+            wire_maker.Add(
+                BRepBuilderAPI_MakeEdge2d(gp_p1, gp_p2).Edge());
+        }
+
+        self.iv_set("@shape",
+            BRepBuilderAPI_MakeFace(wire_maker.Wire()).Shape());
+    } else {
+        // :(
+    }
 }
 
 
@@ -86,9 +146,13 @@ void Init__yrcad()
     Data_Type<Standard_Failure> rb_cOCEError =
         define_class("rb_cOCEError", rb_eRuntimeError);
 
-    Class rb_cShape = define_class("Shape")
+    rb_cShape = define_class("Shape")
         .add_handler<Standard_Failure>(translate_oce_exception)
         .define_method("write_stl", &shape_write_stl);
+
+    Class rb_cPolygon = define_class("Polygon", rb_cShape)
+        .define_method("initialize", &polygon_initialize,
+            (Arg("points"), Arg("paths") = Object(Qnil)));
 
     Class rb_cBox = define_class("Box", rb_cShape)
         .define_method("initialize", &box_initialize);
