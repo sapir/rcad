@@ -12,11 +12,11 @@ require_relative "yrcad"
 class GearProfile < Shape
   attr_reader :pitch_dia, :module_, :p_angle
 
-  # d is pitch diameter - effective diameter of gear
+  # pitch_dia - effective diameter of gear
   #   (not the same as outer diameter)
-  # m is module - ratio of pitch diameter to number of teeth (basically the
+  # module_ - ratio of pitch diameter to number of teeth (basically the
   #   arc length of the tooth spacing)
-  # p_angle is pressure angle.
+  # p_angle - pressure angle.
   #   it seems 20 deg angle is better for torque, but
   #   14.5 deg angle is better for backlash.
   def initialize(pitch_dia, module_=4, p_angle=20)
