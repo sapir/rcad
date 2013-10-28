@@ -17,6 +17,14 @@ class Numeric
   def in
     self * 25.4
   end
+
+  def deg_to_rad
+    self * Math::PI / 180
+  end
+
+  def rad_to_deg
+    self * 180 / Math::PI
+  end
 end
 
 
@@ -99,7 +107,7 @@ class Shape
     LinearExtrusion.new(self, height, twist)
   end
 
-  def revolve(angle=360)
+  def revolve(angle=360.deg_to_rad)
     Revolution.new(self, angle)
   end
 
@@ -226,7 +234,7 @@ end
 class Revolution < Shape
   attr_reader :profile, :angle
 
-  def initialize(profile, angle=360)
+  def initialize(profile, angle=360.deg_to_rad)
     @profile = profile
     @angle = angle
 
