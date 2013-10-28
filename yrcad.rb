@@ -290,16 +290,20 @@ def read_stl(path)
 end
 
 
-polygon = Polygon.method(:new)
-reg_poly = RegularPolygon.method(:new)
-square = Square.method(:new)
-circle = Circle.method(:new)
-text = Text.method(:new)
+def make_maker(name, klass)
+  Object.send(:define_method, name, &klass.method(:new))
+end
 
-box = Box.method(:new)
-cube = Cube.method(:new)
-cylinder = Cylinder.method(:new)
-sphere = Sphere.method(:new)
-polyhedron = Polyhedron.method(:new)
-torus = Torus.method(:new)
-reg_prism = RegularPrism.method(:new)
+make_maker :polygon, Polygon
+make_maker :reg_poly, RegularPolygon
+make_maker :square, Square
+make_maker :circle, Circle
+make_maker :text, Text
+
+make_maker :box, Box
+make_maker :cube, Cube
+make_maker :cylinder, Cylinder
+make_maker :sphere, Sphere
+make_maker :polyhedron, Polyhedron
+make_maker :torus, Torus
+make_maker :reg_prism, RegularPrism
