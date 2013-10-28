@@ -1,19 +1,20 @@
 #include <BRepBuilderAPI_MakeShape.hxx>
 #include <BRepPrimAPI_MakeBox.hxx>
+#include <StlAPI_Writer.hxx>
 #include <rice/Class.hpp>
 
 using namespace Rice;
 
 
-static Data_Object<TopoDS_Shape> wrapShape(const TopoDS_Shape &shape)
+void shape_write_stl(Object self, const char *path)
 {
-    return Data_Object<TopoDS_Shape>(new TopoDS_Shape(shape));
-}
-
-static Data_Object<TopoDS_Shape> wrapShapeFromMaker(
-    const BRepBuilderAPI_MakeShape &maker)
-{
-    return wrapShape(maker.Shape());
+    Data_Object<TopoDS_Shape> shape = self.call("render");
+    
+    StlAPI_Writer writer;
+    writer.ASCIIMode() = false;
+    writer.RelativeMode() = false;
+    writer.SetDeflection(0.05);     // TODO: deflection param
+    writer.Write(*shape, path);
 }
 
 
@@ -24,8 +25,9 @@ void box_initialize(Object self, double xsize, double ysize, double zsize)
     self.iv_set("@zsize", zsize);
 
     self.iv_set("@shape",
-        wrapShapeFromMaker(BRepPrimAPI_MakeBox(xsize, ysize, zsize)));
+        BRepPrimAPI_MakeBox(xsize, ysize, zsize).Shape());
 }
+
 
 void union_initialize(Object self, Object a, Object b)
 {
@@ -33,14 +35,19 @@ void union_initialize(Object self, Object a, Object b)
     self.iv_set("@b", b);
 }
 
+
 extern "C"
 void Init__yrcad()
 {
-    Class rb_cShape = define_class("Shape");
+    Data_Type<TopoDS_Shape> rb_cRenderedShape =
+        define_class<TopoDS_Shape>("RenderedShape");
 
-    Class rb_cBox = define_class("Box")
+    Class rb_cShape = define_class("Shape")
+        .define_method("write_stl", &shape_write_stl);
+
+    Class rb_cBox = define_class("Box", rb_cShape)
         .define_method("initialize", &box_initialize);
 
-    Class rb_cUnion = define_class("Union")
+    Class rb_cUnion = define_class("Union", rb_cShape)
         .define_method("initialize", &union_initialize);
 }

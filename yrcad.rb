@@ -1,3 +1,6 @@
+require_relative '_yrcad'
+
+
 class Numeric
   def mm
     self
@@ -139,10 +142,6 @@ class Shape
   def z_size
     max_z - min_z
   end
-
-  def write_stl(path)
-    # TODO
-  end
 end
 
 
@@ -184,12 +183,6 @@ end
 class Text < Shape
 end
 
-
-class Box < Shape
-  def initialize(xsize, ysize, zsize)
-    @shape = nil    # TODO
-  end
-end
 
 class Cube < Box
   def initialize(size)
