@@ -83,7 +83,7 @@ class GearProfile < Shape
 
     points = []
     (1..num_teeth).each do |i|
-      angle = (360.0 / num_teeth) * i
+      angle = (2 * Math::PI / num_teeth) * i
       points << to_polar(root_r, angle - half_t_root_angle)
       points << to_polar(pitch_r, angle - half_t_angle)
       points << to_polar(outer_r, angle - half_t_tip_angle)
@@ -123,7 +123,7 @@ class HelicalGear < Shape
     twist_length = Math::tan(helix_angle) * height
     pitch_circumference = Math::PI * profile.pitch_dia
 
-    twist_length * (360 / pitch_circumference)
+    twist_length * (2 * Math::PI / pitch_circumference)
   end
 end
 
