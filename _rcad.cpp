@@ -182,7 +182,8 @@ Object linear_extrusion_render(Object self)
 
     if (0 == twist) {
         return to_ruby(
-            BRepPrimAPI_MakePrism(*shape, gp_Vec(0, 0, height), true).Shape());
+            BRepPrimAPI_MakePrism(*shape, gp_Vec(0, 0, height),
+                Standard_True).Shape());
     } else {
         // TODO
     }
