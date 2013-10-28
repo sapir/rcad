@@ -228,27 +228,35 @@ void Init__rcad()
         .define_method("write_stl", &shape_write_stl);
 
     Class rb_cPolygon = define_class("Polygon", rb_cShape)
+        .add_handler<Standard_Failure>(translate_oce_exception)
         .define_method("initialize", &polygon_initialize,
             (Arg("points"), Arg("paths") = Object(Qnil)));
 
     Class rb_cBox = define_class("Box", rb_cShape)
+        .add_handler<Standard_Failure>(translate_oce_exception)
         .define_method("initialize", &box_initialize);
 
     Class rb_cCombination = define_class("Combination", rb_cShape)
+        .add_handler<Standard_Failure>(translate_oce_exception)
         .define_method("initialize", &combination_initialize);
 
     Class rb_cUnion = define_class("Union", rb_cCombination)
+        .add_handler<Standard_Failure>(translate_oce_exception)
         .define_method("render", &union_render);
 
     Class rb_cDifference = define_class("Difference", rb_cCombination)
+        .add_handler<Standard_Failure>(translate_oce_exception)
         .define_method("render", &difference_render);
 
     Class rb_cIntersection = define_class("Intersection", rb_cCombination)
+        .add_handler<Standard_Failure>(translate_oce_exception)
         .define_method("render", &intersection_render);
 
     Class rb_cLinearExtrusion = define_class("LinearExtrusion", rb_cShape)
+        .add_handler<Standard_Failure>(translate_oce_exception)
         .define_method("render", &linear_extrusion_render);
 
     Class rb_cRevolution = define_class("Revolution", rb_cShape)
+        .add_handler<Standard_Failure>(translate_oce_exception)
         .define_method("render", &revolution_render);
 }
