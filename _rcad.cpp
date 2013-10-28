@@ -36,6 +36,22 @@ void translate_oce_exception(const Standard_Failure &e)
 }
 
 
+template<>
+gp_Pnt2d from_ruby<gp_Pnt2d>(Object obj)
+{
+    Array ary(obj);
+
+    if (ary.size() != 2) {
+        throw Exception(rb_eArgError,
+            "2D points must be arrays with 2 numbers each");
+    }
+
+    return gp_Pnt2d(
+        from_ruby<Standard_Real>(ary[0]),
+        from_ruby<Standard_Real>(ary[1]));
+}
+
+
 static Data_Object<TopoDS_Shape> render_shape(Object shape)
 {
     do {
@@ -87,21 +103,6 @@ void shape_write_stl(Object self, String path)
 }
 
 
-static gp_Pnt2d from_ruby_pnt2d(Object obj)
-{
-    Array ary(obj);
-
-    if (ary.size() != 2) {
-        throw Exception(rb_eArgError,
-            "2D points must be arrays with 2 numbers each");
-    }
-
-    return gp_Pnt2d(
-        from_ruby<Standard_Real>(ary[0]),
-        from_ruby<Standard_Real>(ary[1]));
-}
-
-
 void polygon_initialize(Object self, Array points, Object paths)
 {
     self.iv_set("@points", points);
@@ -113,8 +114,8 @@ void polygon_initialize(Object self, Array points, Object paths)
         for (size_t i = 0; i < points.size(); ++i) {
             const size_t j = (i + 1) % points.size();
 
-            gp_Pnt2d gp_p1(from_ruby_pnt2d(points[i]));
-            gp_Pnt2d gp_p2(from_ruby_pnt2d(points[j]));
+            gp_Pnt2d gp_p1(from_ruby<gp_Pnt2d>(points[i]));
+            gp_Pnt2d gp_p2(from_ruby<gp_Pnt2d>(points[j]));
 
             wire_maker.Add(
                 BRepBuilderAPI_MakeEdge2d(gp_p1, gp_p2).Edge());
