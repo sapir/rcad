@@ -1,4 +1,4 @@
-require_relative "yrcad"
+require_relative 'rcad'
 
 
 base = box(10.cm, 10.cm, 3.cm)

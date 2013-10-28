@@ -158,7 +158,7 @@ void linear_extrusion_render(Object self)
 
 
 extern "C"
-void Init__yrcad()
+void Init__rcad()
 {
     Data_Type<TopoDS_Shape> rb_cRenderedShape =
         define_class<TopoDS_Shape>("RenderedShape");

@@ -17,4 +17,4 @@ have_library('TKOffset') or raise
 have_library('TKBO') or raise
 have_library('TKSTL') or raise
 
-create_makefile('_yrcad')
+create_makefile('_rcad')
