@@ -1,8 +1,20 @@
 #include <BRepPrimAPI_MakeBox.hxx>
 #include <StlAPI_Writer.hxx>
+#include <Standard_Failure.hxx>
 #include <rice/Class.hpp>
+#include <rice/Exception.hpp>
 
 using namespace Rice;
+
+
+Data_Type<Standard_Failure> rb_cOCEError;
+
+void translate_oce_exception(const Standard_Failure &e)
+{
+    //Data_Object<Standard_Failure> e_obj(
+    //    new Standard_Failure(e), rb_cOCEError);
+    throw Exception(rb_cOCEError, "%s", e.GetMessageString());
+}
 
 
 void shape_write_stl(Object self, String path)
@@ -41,7 +53,11 @@ void Init__yrcad()
     Data_Type<TopoDS_Shape> rb_cRenderedShape =
         define_class<TopoDS_Shape>("RenderedShape");
 
+    Data_Type<Standard_Failure> rb_cOCEError =
+        define_class("rb_cOCEError", rb_eRuntimeError);
+
     Class rb_cShape = define_class("Shape")
+        .add_handler<Standard_Failure>(translate_oce_exception)
         .define_method("write_stl", &shape_write_stl);
 
     Class rb_cBox = define_class("Box", rb_cShape)
