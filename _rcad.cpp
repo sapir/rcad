@@ -218,7 +218,7 @@ void Init__rcad()
         define_class<TopoDS_Shape>("RenderedShape");
 
     Data_Type<Standard_Failure> rb_cOCEError =
-        define_class("rb_cOCEError", rb_eRuntimeError);
+        define_class("OCEError", rb_eRuntimeError);
 
     rb_cShape = define_class("Shape")
         .add_handler<Standard_Failure>(translate_oce_exception)
