@@ -26,6 +26,8 @@ TOLERANCE = 50.um
 
 
 class Shape
+  # if @shape isn't defined in a Shape's initialize() method, then render()
+  # should be overridden to create it on-the-fly
   def render
     @shape
   end
