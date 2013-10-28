@@ -140,7 +140,7 @@ Object intersection_render(Object self)
 
 
 // initialize is defined in Ruby code
-void linear_extrusion_render(Object self)
+Object linear_extrusion_render(Object self)
 {
     Object profile = self.iv_get("@profile");
     Standard_Real height = from_ruby<Standard_Real>(self.iv_get("@height"));
@@ -149,11 +149,13 @@ void linear_extrusion_render(Object self)
     Data_Object<TopoDS_Shape> shape = profile.call("render");
 
     if (0 == twist) {
-        self.iv_set("@shape",
+        return to_ruby(
             BRepPrimAPI_MakePrism(*shape, gp_Vec(0, 0, height), true).Shape());
     } else {
         // TODO
     }
+
+    return Object();
 }
 
 
