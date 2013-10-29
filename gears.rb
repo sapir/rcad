@@ -134,9 +134,11 @@ class HerringboneGear < Shape
   def initialize(*args)
     @helical_gear = HelicalGear.new(*args)
 
-    @shape = helical_gear
-        .add helical_gear
-              .scale_z(-1)
-              .move_z(helical_gear.height)
+    @shape = add do
+        ~helical_gear
+        ~helical_gear
+          .scale_z(-1)
+          .move_z(helical_gear.height)
+      end
   end
 end
