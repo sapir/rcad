@@ -14,8 +14,8 @@ require 'gears'
 ~sub do
   ~SpurGear.new(1.cm, 4.8.cm)
 
-  # hole for an M3 screw
-  ~cylinder(3.mm)
+  # make a hole for an M3 screw
+  ~cylinder(1.cm, 3.mm)
 end
 
 # STL is written automatically on exit
