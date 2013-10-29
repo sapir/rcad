@@ -77,7 +77,8 @@ class Bolt < BaseBoltPart
     d = nut_dia_across_corners + @xytol
     h = head_height + @ztol
     head = reg_prism(6, d / 2.0, h)
-    return add do
+
+    add do
         ~head
         ~cylinder(total_len + @ztol, bolt_dia + @xytol)
           .move_z(-head_height)
