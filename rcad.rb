@@ -55,6 +55,10 @@ class Shape
     Intersection.new(self, right)
   end
 
+  def ~@
+    $shape = ($shape == nil) ? self : $shape.send($shape_mode, self)
+  end
+
   def move_x(delta)
     move(delta, 0, 0)
   end
@@ -137,6 +141,51 @@ class Shape
 
   def z_size
     max_z - min_z
+  end
+end
+
+$shape_stack = []
+$shape = nil
+$shape_mode = :+
+
+def _shape_mode_block(mode, &block)
+  $shape_stack.push([$shape, $shape_mode])
+  $shape = nil
+  $shape_mode = mode
+
+  block.call
+  res = $shape
+
+  $shape, $shape_mode = $shape_stack.pop
+  res
+end
+
+def add(&block)
+  _shape_mode_block(:+, &block)
+end
+
+def sub(&block)
+  _shape_mode_block(:-, &block)
+end
+
+def mul(&block)
+  _shape_mode_block(:*, &block)
+end
+
+def write_stl(*args)
+  $shape != nil or raise
+  $shape.write_stl(*args)
+end
+
+def clear_shape
+  $shape = nil
+end
+
+at_exit do
+  if $shape
+    output_file = File.basename($0, ".*") + ".stl"
+    printf("Writing '%s'\n", output_file)
+    write_stl(output_file)
   end
 end
 
