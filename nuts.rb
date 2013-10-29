@@ -44,8 +44,11 @@ class HexNut < BaseBoltPart
     if full
       return nut
     else
-      return nut.sub(
-        cylinder(h + 0.02, bolt_dia + @xytol).move_z(-0.01))
+      return sub do
+          ~nut
+          ~cylinder(h + 0.02, bolt_dia + @xytol)
+            .move_z(-0.01)
+        end
     end
   end
 end
