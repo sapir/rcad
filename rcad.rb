@@ -43,16 +43,16 @@ class Shape
     @shape
   end
 
-  def add(shape)
-    Union.new(self, shape)
+  def +(right)
+    Union.new(self, right)
   end
 
-  def sub(shape)
-    Difference.new(self, shape)
+  def -(right)
+    Difference.new(self, right)
   end
 
-  def mul(shape)
-    Intersection.new(self, shape)
+  def *(right)
+    Intersection.new(self, right)
   end
 
   def move_x(delta)
