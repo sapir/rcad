@@ -56,7 +56,11 @@ class Shape
   end
 
   def ~@
-    $shape = ($shape == nil) ? self : $shape.send($shape_mode, self)
+    if $shape_mode == :hull
+      $shape << self
+    else
+      $shape = ($shape == nil) ? self : $shape.send($shape_mode, self)
+    end
   end
 
   def move_x(delta)
@@ -170,6 +174,18 @@ end
 
 def mul(&block)
   _shape_mode_block(:*, &block)
+end
+
+def hull(&block)
+  $shape_stack.push([$shape, $shape_mode])
+  $shape = []
+  $shape_mode = :hull
+
+  block.call
+  res = _hull($shape)
+
+  $shape, $shape_mode = $shape_stack.pop
+  res
 end
 
 def write_stl(*args)
