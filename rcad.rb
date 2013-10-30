@@ -61,6 +61,8 @@ class Shape
     else
       $shape = ($shape == nil) ? self : $shape.send($shape_mode, self)
     end
+
+    self
   end
 
   def move_x(delta)
