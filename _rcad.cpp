@@ -3,7 +3,6 @@
 #include <gp_Vec.hxx>
 #include <gp_Circ.hxx>
 #include <TopoDS.hxx>
-#include <BRep_Builder.hxx>
 #include <BRepPrimAPI_MakeBox.hxx>
 #include <BRepPrimAPI_MakeCylinder.hxx>
 #include <BRepPrimAPI_MakeSphere.hxx>
@@ -18,8 +17,11 @@
 #include <BRepBuilderAPI_MakeEdge.hxx>
 #include <BRepBuilderAPI_MakeWire.hxx>
 #include <BRepBuilderAPI_MakeFace.hxx>
+#include <BRepBuilderAPI_MakeSolid.hxx>
 #include <BRepBuilderAPI_Transform.hxx>
 #include <BRepBuilderAPI_GTransform.hxx>
+#include <BRepBuilderAPI_Sewing.hxx>
+#include <BRepClass3d_SolidClassifier.hxx>
 #include <StlAPI_Reader.hxx>
 #include <StlAPI_Writer.hxx>
 #include <Standard_Failure.hxx>
@@ -263,22 +265,28 @@ Object polyhedron_render(Object self)
             "Polyhedron must have at least 4 faces!");
     }
 
-    BRep_Builder builder;
-
-    TopoDS_Shell shell;
-    builder.MakeShell(shell);
+    BRepBuilderAPI_Sewing sewing;
 
     for (size_t i = 0; i < faces.size(); ++i) {
         TopoDS_Wire wire = make_wire_from_path<gp_Pnt,
             BRepBuilderAPI_MakeEdge>(points, faces[i]);
 
-        builder.Add(shell,
-            BRepBuilderAPI_MakeFace(wire).Face());
+        sewing.Add(BRepBuilderAPI_MakeFace(wire).Face());
     }
 
-    TopoDS_Solid solid;
-    builder.MakeSolid(solid);
-    builder.Add(solid, shell);
+    sewing.Perform();
+
+    TopoDS_Shell shell = TopoDS::Shell(sewing.SewedShape());
+    // TODO: check for free/multiple edges and problems from sewing object
+
+    TopoDS_Solid solid = BRepBuilderAPI_MakeSolid(shell).Solid();
+
+    // check if shape is inside-out and fix it if it is
+    BRepClass3d_SolidClassifier classifier(solid);
+    classifier.PerformInfinitePoint(Precision::Confusion());
+    if (classifier.State() == TopAbs_IN) {
+        solid = TopoDS::Solid(solid.Oriented(TopAbs_REVERSED));
+    }
 
     return wrap_rendered_shape(solid);
 }
