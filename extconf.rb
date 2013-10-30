@@ -9,6 +9,7 @@ dir_config('TKPrim', OCE_INCLUDE_DIR, OCE_LIB_DIR)
 dir_config('TKOffset', OCE_INCLUDE_DIR, OCE_LIB_DIR)
 dir_config('TKBO', OCE_INCLUDE_DIR, OCE_LIB_DIR)
 dir_config('TKSTL', OCE_INCLUDE_DIR, OCE_LIB_DIR)
+dir_config('qhull', '/usr/include/qhull', '/usr/lib')
 
 have_library('TKG3d') or raise
 have_library('TKBRep') or raise
@@ -16,5 +17,6 @@ have_library('TKPrim') or raise
 have_library('TKOffset') or raise
 have_library('TKBO') or raise
 have_library('TKSTL') or raise
+have_library('qhull') or raise
 
 create_makefile('_rcad')
