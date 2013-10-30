@@ -57,6 +57,22 @@ gp_Pnt2d from_ruby<gp_Pnt2d>(Object obj)
 }
 
 template<>
+gp_Pnt from_ruby<gp_Pnt>(Object obj)
+{
+    Array ary(obj);
+
+    if (ary.size() != 3) {
+        throw Exception(rb_eArgError,
+            "3D points must be arrays with 3 numbers each");
+    }
+
+    return gp_Pnt(
+        from_ruby<Standard_Real>(ary[0]),
+        from_ruby<Standard_Real>(ary[1]),
+        from_ruby<Standard_Real>(ary[2]));
+}
+
+template<>
 gp_Vec from_ruby<gp_Vec>(Object obj)
 {
     Array ary(obj);
