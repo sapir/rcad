@@ -190,6 +190,16 @@ at_exit do
 end
 
 
+class Polygon
+  attr_reader :points, :paths
+
+  def initialize(points, paths=nil)
+    @points = points
+    @paths = paths
+  end
+end
+
+
 class RegularPolygon < Polygon
   attr_reader :sides, :radius
 

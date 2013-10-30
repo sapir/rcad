@@ -154,10 +154,10 @@ Object shape_from_stl(String path)
 }
 
 
-void polygon_initialize(Object self, Array points, Object paths)
+Object polygon_render(Object self)
 {
-    self.iv_set("@points", points);
-    self.iv_set("@paths", paths);
+    Array points = self.iv_get("@points");
+    Object paths = self.iv_get("@paths");
 
     if (paths.is_nil()) {
         BRepBuilderAPI_MakeWire wire_maker;
@@ -172,9 +172,10 @@ void polygon_initialize(Object self, Array points, Object paths)
                 BRepBuilderAPI_MakeEdge2d(gp_p1, gp_p2).Edge());
         }
 
-        self.iv_set("@shape",
+        return wrap_rendered_shape(
             BRepBuilderAPI_MakeFace(wire_maker.Wire()).Shape());
     } else {
+        return Object(Qnil);
         // TODO
     }
 }
@@ -319,8 +320,7 @@ void Init__rcad()
 
     Class rb_cPolygon = define_class("Polygon", rb_cShape)
         .add_handler<Standard_Failure>(translate_oce_exception)
-        .define_method("initialize", &polygon_initialize,
-            (Arg("points"), Arg("paths") = Object(Qnil)));
+        .define_method("render", &polygon_render);
 
     Class rb_cBox = define_class("Box", rb_cShape)
         .add_handler<Standard_Failure>(translate_oce_exception)
