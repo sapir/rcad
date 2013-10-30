@@ -28,6 +28,9 @@
 #include <rice/Class.hpp>
 #include <rice/Exception.hpp>
 #include <rice/Array.hpp>
+#include <rice/global_function.hpp>
+#include <qhull/qhull_a.h>
+
 
 using namespace Rice;
 
@@ -387,6 +390,12 @@ Object revolution_render(Object self)
 }
 
 
+Object _hull(Array objects)
+{
+    return Object(Qnil);
+}
+
+
 extern "C"
 void Init__rcad()
 {
@@ -456,4 +465,6 @@ void Init__rcad()
     Class rb_cRevolution = define_class("Revolution", rb_cShape)
         .add_handler<Standard_Failure>(translate_oce_exception)
         .define_method("render", &revolution_render);
+
+    define_global_function("_hull", &_hull);
 }
