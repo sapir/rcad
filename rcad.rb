@@ -195,7 +195,7 @@ class Polygon
 
   def initialize(points, paths=nil)
     @points = points
-    @paths = paths || ([(0...points.size).to_a << [0]])
+    @paths = paths || [(0...points.size).to_a]
   end
 end
 

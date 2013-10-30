@@ -1,6 +1,7 @@
 #include <gp_Pnt2d.hxx>
 #include <gp_Pnt.hxx>
 #include <gp_Vec.hxx>
+#include <TopoDS.hxx>
 #include <BRepPrimAPI_MakeBox.hxx>
 #include <BRepPrimAPI_MakeCylinder.hxx>
 #include <BRepPrimAPI_MakeSphere.hxx>
@@ -154,30 +155,47 @@ Object shape_from_stl(String path)
 }
 
 
+static TopoDS_Wire make_2d_wire_from_path(Array points, Array path)
+{
+    BRepBuilderAPI_MakeWire wire_maker;
+
+    for (size_t i = 0; i < path.size(); ++i) {
+        const size_t j = (i + 1) % path.size();
+
+        const size_t p1_idx = from_ruby<size_t>(path[i]);
+        const size_t p2_idx = from_ruby<size_t>(path[j]);
+
+        gp_Pnt2d gp_p1(from_ruby<gp_Pnt2d>(points[p1_idx]));
+        gp_Pnt2d gp_p2(from_ruby<gp_Pnt2d>(points[p2_idx]));
+
+        wire_maker.Add(
+            BRepBuilderAPI_MakeEdge2d(gp_p1, gp_p2).Edge());
+    }
+
+    return wire_maker.Wire();
+}
+
 Object polygon_render(Object self)
 {
-    Array points = self.iv_get("@points");
-    Object paths = self.iv_get("@paths");
+    const Array points = self.iv_get("@points");
+    const Array paths = self.iv_get("@paths");
 
-    if (paths.is_nil()) {
-        BRepBuilderAPI_MakeWire wire_maker;
-
-        for (size_t i = 0; i < points.size(); ++i) {
-            const size_t j = (i + 1) % points.size();
-
-            gp_Pnt2d gp_p1(from_ruby<gp_Pnt2d>(points[i]));
-            gp_Pnt2d gp_p2(from_ruby<gp_Pnt2d>(points[j]));
-
-            wire_maker.Add(
-                BRepBuilderAPI_MakeEdge2d(gp_p1, gp_p2).Edge());
-        }
-
-        return wrap_rendered_shape(
-            BRepBuilderAPI_MakeFace(wire_maker.Wire()).Shape());
-    } else {
-        return Object(Qnil);
-        // TODO
+    if (paths.size() == 0) {
+        throw Exception(rb_eArgError,
+            "Polygon must have at least 1 path!");
     }
+
+    BRepBuilderAPI_MakeFace face_maker(
+        make_2d_wire_from_path(points, paths[0]));
+    for (size_t i = 1; i < paths.size(); ++i) {
+        TopoDS_Wire wire = make_2d_wire_from_path(points, paths[i]);
+
+        // all paths except the first are inner loops,
+        // so they should be reversed
+        face_maker.Add(TopoDS::Wire(wire.Oriented(TopAbs_REVERSED)));
+    }
+
+    return wrap_rendered_shape(face_maker.Shape());
 }
 
 
