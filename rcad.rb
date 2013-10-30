@@ -200,7 +200,7 @@ def clear_shape
 end
 
 at_exit do
-  if $shape
+  if $shape && ($! == nil)
     output_file = File.basename($0, ".*") + ".stl"
     printf("Writing '%s'\n", output_file)
     write_stl(output_file)
