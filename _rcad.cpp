@@ -2,6 +2,7 @@
 #include <gp_Pnt.hxx>
 #include <gp_Vec.hxx>
 #include <gp_Circ.hxx>
+#include <Poly_Triangulation.hxx>
 #include <TopoDS.hxx>
 #include <BRepPrimAPI_MakeBox.hxx>
 #include <BRepPrimAPI_MakeCylinder.hxx>
@@ -22,6 +23,7 @@
 #include <BRepBuilderAPI_GTransform.hxx>
 #include <BRepBuilderAPI_Sewing.hxx>
 #include <BRepClass3d_SolidClassifier.hxx>
+#include <BRepMesh_IncrementalMesh.hxx>
 #include <StlAPI_Reader.hxx>
 #include <StlAPI_Writer.hxx>
 #include <Standard_Failure.hxx>
@@ -29,7 +31,10 @@
 #include <rice/Exception.hpp>
 #include <rice/Array.hpp>
 #include <rice/global_function.hpp>
+
+extern "C" {
 #include <qhull/qhull_a.h>
+}
 
 
 using namespace Rice;
@@ -258,11 +263,8 @@ Object sphere_render(Object self)
 }
 
 
-Object polyhedron_render(Object self)
+static Object polyhedron_render_internal(const Array points, const Array faces)
 {
-    const Array points = self.iv_get("@points");
-    const Array faces = self.iv_get("@faces");
-
     if (faces.size() < 4) {
         throw Exception(rb_eArgError,
             "Polyhedron must have at least 4 faces!");
@@ -292,6 +294,13 @@ Object polyhedron_render(Object self)
     }
 
     return wrap_rendered_shape(solid);
+}
+
+Object polyhedron_render(Object self)
+{
+    const Array points = self.iv_get("@points");
+    const Array faces = self.iv_get("@faces");
+    return polyhedron_render_internal(points, faces);
 }
 
 
@@ -390,9 +399,84 @@ Object revolution_render(Object self)
 }
 
 
+static void get_points_from_shape(const TopoDS_Shape &shape,
+    Array points, std::vector<Standard_Real> &point_coords)
+{
+    TopExp_Explorer ex(shape, TopAbs_FACE);
+    for (; ex.More(); ex.Next()) {
+        const TopoDS_Face& face = TopoDS::Face(ex.Current());
+
+        TopLoc_Location loc;
+        Handle(Poly_Triangulation) tri = BRep_Tool::Triangulation(face, loc);
+
+        if (tri.IsNull()) {
+            throw Exception(rb_cOCEError, "No triangulation");
+        }
+
+        const Standard_Integer numNodes = tri->NbNodes();
+        const TColgp_Array1OfPnt& nodes = tri->Nodes();
+        for (Standard_Integer i = 1; i <= numNodes; i++) {
+            gp_Pnt p = loc.IsIdentity()
+                ? nodes(i)
+                : nodes(i).Transformed(loc);
+
+            point_coords.push_back(p.X());
+            point_coords.push_back(p.Y());
+            point_coords.push_back(p.Z());
+
+            Array pnt_ary;
+            pnt_ary.push(p.X());
+            pnt_ary.push(p.Y());
+            pnt_ary.push(p.Z());
+            points.push(pnt_ary);
+        }
+    }
+}
+
 Object _hull(Array objects)
 {
-    return Object(Qnil);
+    Array points;
+    std::vector<Standard_Real> point_coords;
+
+    for (size_t i = 0; i < objects.size(); ++i) {
+        Data_Object<TopoDS_Shape> shape_obj = render_shape(objects[i]);
+        const TopoDS_Shape &shape = *shape_obj;
+
+        BRepMesh_IncrementalMesh(shape, 0.05);      // TODO: tolerance
+
+        get_points_from_shape(shape, points, point_coords);
+    }
+
+    char flags[128];
+    strcpy(flags, "qhull Qt Tcv");
+    int err = qh_new_qhull(3, point_coords.size() / 3, point_coords.data(),
+        false, flags, NULL, stderr);
+    if (err) {
+        throw Exception(rb_cOCEError, "Error running qhull");
+    }
+
+    Array faces;
+    facetT *facet;
+    FORALLfacets {
+        Array face;
+        vertexT *vertex, **vertexp;
+        FOREACHvertex_(facet->vertices) {
+            face.push(qh_pointid(vertex->point));
+        }
+
+        faces.push(face);
+    }
+
+    qh_freeqhull(!qh_ALL);
+    int curlong, totlong;
+    qh_memfreeshort(&curlong, &totlong);
+    if (curlong || totlong) {
+        throw Exception(rb_cOCEError,
+            "did not free %d bytes of long memory (%d pieces)",
+            totlong, curlong);
+    }
+
+    return polyhedron_render_internal(points, faces);
 }
 
 
