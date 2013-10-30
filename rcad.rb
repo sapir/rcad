@@ -284,8 +284,11 @@ end
 
 
 class Polyhedron < Shape
-  def initialize(points, triangles)
-    @shape = nil    # TODO
+  attr_accessor :points, :faces
+
+  def initialize(points, faces)
+    @points = points
+    @faces = faces
   end
 end
 

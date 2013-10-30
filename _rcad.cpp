@@ -3,6 +3,7 @@
 #include <gp_Vec.hxx>
 #include <gp_Circ.hxx>
 #include <TopoDS.hxx>
+#include <BRep_Builder.hxx>
 #include <BRepPrimAPI_MakeBox.hxx>
 #include <BRepPrimAPI_MakeCylinder.hxx>
 #include <BRepPrimAPI_MakeSphere.hxx>
@@ -172,7 +173,8 @@ Object shape_from_stl(String path)
 }
 
 
-static TopoDS_Wire make_2d_wire_from_path(Array points, Array path)
+template<class PointType, class EdgeMakerType>
+static TopoDS_Wire make_wire_from_path(Array points, Array path)
 {
     BRepBuilderAPI_MakeWire wire_maker;
 
@@ -182,11 +184,10 @@ static TopoDS_Wire make_2d_wire_from_path(Array points, Array path)
         const size_t p1_idx = from_ruby<size_t>(path[i]);
         const size_t p2_idx = from_ruby<size_t>(path[j]);
 
-        gp_Pnt2d gp_p1(from_ruby<gp_Pnt2d>(points[p1_idx]));
-        gp_Pnt2d gp_p2(from_ruby<gp_Pnt2d>(points[p2_idx]));
+        PointType gp_p1(from_ruby<PointType>(points[p1_idx]));
+        PointType gp_p2(from_ruby<PointType>(points[p2_idx]));
 
-        wire_maker.Add(
-            BRepBuilderAPI_MakeEdge2d(gp_p1, gp_p2).Edge());
+        wire_maker.Add(EdgeMakerType(gp_p1, gp_p2).Edge());
     }
 
     return wire_maker.Wire();
@@ -203,9 +204,11 @@ Object polygon_render(Object self)
     }
 
     BRepBuilderAPI_MakeFace face_maker(
-        make_2d_wire_from_path(points, paths[0]));
+        make_wire_from_path<gp_Pnt2d, BRepBuilderAPI_MakeEdge2d>(
+            points, paths[0]));
     for (size_t i = 1; i < paths.size(); ++i) {
-        TopoDS_Wire wire = make_2d_wire_from_path(points, paths[i]);
+        TopoDS_Wire wire = make_wire_from_path<gp_Pnt2d,
+            BRepBuilderAPI_MakeEdge2d>(points, paths[i]);
 
         // all paths except the first are inner loops,
         // so they should be reversed
@@ -247,6 +250,37 @@ Object sphere_render(Object self)
 {
     Standard_Real dia = from_ruby<Standard_Real>(self.iv_get("@dia"));
     return to_ruby(BRepPrimAPI_MakeSphere(dia / 2.0).Shape());
+}
+
+
+Object polyhedron_render(Object self)
+{
+    const Array points = self.iv_get("@points");
+    const Array faces = self.iv_get("@faces");
+
+    if (faces.size() < 4) {
+        throw Exception(rb_eArgError,
+            "Polyhedron must have at least 4 faces!");
+    }
+
+    BRep_Builder builder;
+
+    TopoDS_Shell shell;
+    builder.MakeShell(shell);
+
+    for (size_t i = 0; i < faces.size(); ++i) {
+        TopoDS_Wire wire = make_wire_from_path<gp_Pnt,
+            BRepBuilderAPI_MakeEdge>(points, faces[i]);
+
+        builder.Add(shell,
+            BRepBuilderAPI_MakeFace(wire).Face());
+    }
+
+    TopoDS_Solid solid;
+    builder.MakeSolid(solid);
+    builder.Add(solid, shell);
+
+    return wrap_rendered_shape(solid);
 }
 
 
@@ -382,6 +416,10 @@ void Init__rcad()
     Class rb_cSphere = define_class("Sphere", rb_cShape)
         .add_handler<Standard_Failure>(translate_oce_exception)
         .define_method("render", &sphere_render);
+
+    Class rb_cPolyhedron = define_class("Polyhedron", rb_cShape)
+        .add_handler<Standard_Failure>(translate_oce_exception)
+        .define_method("render", &polyhedron_render);
 
     Class rb_cTorus = define_class("Torus", rb_cShape)
         .add_handler<Standard_Failure>(translate_oce_exception)
