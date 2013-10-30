@@ -226,8 +226,10 @@ end
 
 
 class Circle < Shape
+  attr_accessor :dia
+
   def initialize(dia)
-    @shape = nil    # TODO
+    @dia = dia
   end
 end
 

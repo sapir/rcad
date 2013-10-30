@@ -1,6 +1,7 @@
 #include <gp_Pnt2d.hxx>
 #include <gp_Pnt.hxx>
 #include <gp_Vec.hxx>
+#include <gp_Circ.hxx>
 #include <TopoDS.hxx>
 #include <BRepPrimAPI_MakeBox.hxx>
 #include <BRepPrimAPI_MakeCylinder.hxx>
@@ -198,6 +199,15 @@ Object polygon_render(Object self)
     return wrap_rendered_shape(face_maker.Shape());
 }
 
+Object circle_render(Object self)
+{
+    Standard_Real dia = from_ruby<Standard_Real>(self.iv_get("@dia"));
+    gp_Circ circ(gp_Ax2(), dia / 2.0);
+    TopoDS_Edge edge = BRepBuilderAPI_MakeEdge(circ).Edge();
+    TopoDS_Wire wire = BRepBuilderAPI_MakeWire(edge).Wire();
+    return wrap_rendered_shape(BRepBuilderAPI_MakeFace(wire).Shape());
+}
+
 
 Object box_render(Object self)
 {
@@ -339,6 +349,11 @@ void Init__rcad()
     Class rb_cPolygon = define_class("Polygon", rb_cShape)
         .add_handler<Standard_Failure>(translate_oce_exception)
         .define_method("render", &polygon_render);
+
+    Class rb_cCircle = define_class("Circle", rb_cShape)
+        .add_handler<Standard_Failure>(translate_oce_exception)
+        .define_method("render", &circle_render);
+
 
     Class rb_cBox = define_class("Box", rb_cShape)
         .add_handler<Standard_Failure>(translate_oce_exception)
