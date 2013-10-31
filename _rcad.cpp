@@ -41,6 +41,7 @@ using namespace Rice;
 
 
 Data_Type<Standard_Failure> rb_cOCEError;
+Data_Type<TopoDS_Shape> rb_cRenderedShape;
 Class rb_cShape;
 
 
@@ -108,12 +109,26 @@ gp_Dir from_ruby<gp_Dir>(Object obj)
 
 static Data_Object<TopoDS_Shape> render_shape(Object shape)
 {
-    do {
+    if (shape.is_a(rb_cRenderedShape)) {
+        return shape;
+    }
+
+    if (!shape.is_a(rb_cShape)) {
+        String shape_str = shape.to_s();
+        throw Exception(rb_eArgError,
+            "attempt to render %s which is not a Shape",
+            shape_str.c_str());
+    }
+
+    while (shape.is_a(rb_cShape)) {
         shape = shape.call("render");
-    } while (shape.is_a(rb_cShape));
-    
-    if (shape.is_nil()) {
-        throw Exception(rb_eArgError, "render returned nil");
+    }
+
+    if (!shape.is_a(rb_cRenderedShape)) {
+        String shape_str = shape.to_s();
+        throw Exception(rb_eArgError,
+            "render returned %s instead of a rendered shape",
+            shape_str.c_str());
     }
 
     return shape;
