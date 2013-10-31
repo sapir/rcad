@@ -52,6 +52,11 @@ std::ostream &operator <<(std::ostream &lhs, gp_Pnt rhs)
     return lhs << "(" << rhs.X() << "," << rhs.Y() << "," << rhs.Z() << ")";
 }
 
+std::ostream &operator <<(std::ostream &lhs, gp_Vec rhs)
+{
+    return lhs << "(" << rhs.X() << "," << rhs.Y() << "," << rhs.Z() << ")";
+}
+
 
 void translate_oce_exception(const Standard_Failure &e)
 {
