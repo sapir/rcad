@@ -415,7 +415,7 @@ Object revolution_render(Object self)
 
 
 static void get_points_from_shape(const TopoDS_Shape &shape,
-    Array points, std::vector<Standard_Real> &point_coords)
+    std::vector<gp_Pnt> &points)
 {
     TopExp_Explorer ex(shape, TopAbs_FACE);
     for (; ex.More(); ex.Next()) {
@@ -431,56 +431,79 @@ static void get_points_from_shape(const TopoDS_Shape &shape,
         const Standard_Integer numNodes = tri->NbNodes();
         const TColgp_Array1OfPnt& nodes = tri->Nodes();
         for (Standard_Integer i = 1; i <= numNodes; i++) {
-            gp_Pnt p = loc.IsIdentity()
+            points.push_back(
+                loc.IsIdentity()
                 ? nodes(i)
-                : nodes(i).Transformed(loc);
-
-            point_coords.push_back(p.X());
-            point_coords.push_back(p.Y());
-            point_coords.push_back(p.Z());
-
-            Array pnt_ary;
-            pnt_ary.push(p.X());
-            pnt_ary.push(p.Y());
-            pnt_ary.push(p.Z());
-            points.push(pnt_ary);
+                : nodes(i).Transformed(loc));
         }
     }
 }
 
-Object _hull(Array objects)
+static std::vector<gp_Pnt> get_points_from_shapes(Array shapes)
 {
-    Array points;
-    std::vector<Standard_Real> point_coords;
+    std::vector<gp_Pnt> points;
 
-    for (size_t i = 0; i < objects.size(); ++i) {
-        Data_Object<TopoDS_Shape> shape_obj = render_shape(objects[i]);
+    for (size_t i = 0; i < shapes.size(); ++i) {
+        Data_Object<TopoDS_Shape> shape_obj = render_shape(shapes[i]);
         const TopoDS_Shape &shape = *shape_obj;
 
         BRepMesh_IncrementalMesh(shape, 0.05);      // TODO: tolerance
 
-        get_points_from_shape(shape, points, point_coords);
+        get_points_from_shape(shape, points);
     }
 
+    return points;
+}
+
+static TopoDS_Solid make_solid_from_qhull()
+{
+    BRepBuilderAPI_Sewing sewing;
+
+    facetT *facet;
+    FORALLfacets {
+        BRepBuilderAPI_MakeWire wire_maker;
+
+        vertexT *vertex, **vertexp;
+        FOREACHvertex_(facet->vertices) {
+            gp_Pnt p1(vertex->point[0], vertex->point[1], vertex->point[2]);
+
+            vertexT *next_vertex =
+                (NULL == *vertexp)
+                ? SETfirstt_(facet->vertices, vertexT)
+                : (*vertexp);
+
+            gp_Pnt p2(next_vertex->point[0], next_vertex->point[1],
+                next_vertex->point[2]);
+
+            wire_maker.Add(BRepBuilderAPI_MakeEdge(p1, p2).Edge());
+        }
+
+        sewing.Add(BRepBuilderAPI_MakeFace(wire_maker.Wire()).Face());
+    }
+
+    sewing.Perform();
+
+    TopoDS_Shell shell = TopoDS::Shell(sewing.SewedShape());
+    // TODO: check for free/multiple edges and problems from sewing object
+
+    return BRepBuilderAPI_MakeSolid(shell).Solid();
+}
+
+static Object _hull(Array shapes)
+{
+    std::vector<gp_Pnt> points = get_points_from_shapes(shapes);
+
     char flags[128];
-    strcpy(flags, "qhull Qt Tcv");
-    int err = qh_new_qhull(3, point_coords.size() / 3, point_coords.data(),
+    strcpy(flags, "qhull Qt");
+    int err = qh_new_qhull(3, points.size(),
+        // each point contains a gp_XYZ which contains X,Y,Z as Standard_Reals
+        reinterpret_cast<Standard_Real*>(points.data()),
         false, flags, NULL, stderr);
     if (err) {
         throw Exception(rb_cOCEError, "Error running qhull");
     }
 
-    Array faces;
-    facetT *facet;
-    FORALLfacets {
-        Array face;
-        vertexT *vertex, **vertexp;
-        FOREACHvertex_(facet->vertices) {
-            face.push(qh_pointid(vertex->point));
-        }
-
-        faces.push(face);
-    }
+    TopoDS_Solid solid = make_solid_from_qhull();
 
     qh_freeqhull(!qh_ALL);
     int curlong, totlong;
@@ -491,7 +514,7 @@ Object _hull(Array objects)
             totlong, curlong);
     }
 
-    return polyhedron_render_internal(points, faces);
+    return wrap_rendered_shape(solid);
 }
 
 
