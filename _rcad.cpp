@@ -278,6 +278,16 @@ Object sphere_render(Object self)
 }
 
 
+// check if shape is inside-out and fix it if it is
+static void fix_inside_out_solid(TopoDS_Solid &solid)
+{
+    BRepClass3d_SolidClassifier classifier(solid);
+    classifier.PerformInfinitePoint(Precision::Confusion());
+    if (classifier.State() == TopAbs_IN) {
+        solid = TopoDS::Solid(solid.Oriented(TopAbs_REVERSED));
+    }
+}
+
 static Object polyhedron_render_internal(const Array points, const Array faces)
 {
     if (faces.size() < 4) {
@@ -301,12 +311,7 @@ static Object polyhedron_render_internal(const Array points, const Array faces)
 
     TopoDS_Solid solid = BRepBuilderAPI_MakeSolid(shell).Solid();
 
-    // check if shape is inside-out and fix it if it is
-    BRepClass3d_SolidClassifier classifier(solid);
-    classifier.PerformInfinitePoint(Precision::Confusion());
-    if (classifier.State() == TopAbs_IN) {
-        solid = TopoDS::Solid(solid.Oriented(TopAbs_REVERSED));
-    }
+    fix_inside_out_solid(solid);
 
     return wrap_rendered_shape(solid);
 }
@@ -486,7 +491,11 @@ static TopoDS_Solid make_solid_from_qhull()
     TopoDS_Shell shell = TopoDS::Shell(sewing.SewedShape());
     // TODO: check for free/multiple edges and problems from sewing object
 
-    return BRepBuilderAPI_MakeSolid(shell).Solid();
+    TopoDS_Solid solid = BRepBuilderAPI_MakeSolid(shell).Solid();
+    
+    fix_inside_out_solid(solid);
+
+    return solid;
 }
 
 static Object _hull(Array shapes)
