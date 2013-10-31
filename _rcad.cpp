@@ -461,20 +461,70 @@ static std::vector<gp_Pnt> get_points_from_shapes(Array shapes)
     return points;
 }
 
+
+// Sort function object to sort polygon vertices
+// Algorithm from here:
+// http://stackoverflow.com/a/15104911/2758814
+class PolygonVertexSortComparator
+{
+public:
+    PolygonVertexSortComparator(std::vector<gp_Pnt> vertices)
+        : vertices(vertices)
+    {
+        if (vertices.size() == 0) {
+            throw std::exception();
+        }
+
+        // get center point
+        for (size_t i = 0; i < vertices.size(); ++i) {
+            center.Translate(gp::Origin(), vertices[i]);
+        }
+        center.Scale(gp::Origin(), 1.0/vertices.size());
+
+        // get one of the vectors
+        center_to_first_vert = gp_Vec(center, vertices[0]);
+    }
+
+    bool operator() (gp_Pnt a, gp_Pnt b) {
+        double angle1 = get_angle_to_vec(a);
+        double angle2 = get_angle_to_vec(b);
+        return angle1 < angle2;
+    }
+
+private:
+    bool get_angle_to_vec(gp_Pnt vertex) {
+        gp_Vec center_to_vertex(center, vertex);
+        return center_to_first_vert.Angle(center_to_vertex);
+    }
+
+    std::vector<gp_Pnt> vertices;
+    gp_Pnt center;
+    gp_Vec center_to_first_vert;
+};
+
 static TopoDS_Solid make_solid_from_qhull()
 {
     BRepBuilderAPI_Sewing sewing;
 
     facetT *facet;
     FORALLfacets {
-        BRepBuilderAPI_MakePolygon poly_maker;
+        // get vertices into an std::vector
+        std::vector<gp_Pnt> vertices;
+        vertices.reserve(qh_setsize(facet->vertices));
 
         vertexT *vertex, **vertexp;
         FOREACHvertex_(facet->vertices) {
-            poly_maker.Add(gp_Pnt(vertex->point[0], vertex->point[1],
+            vertices.push_back(gp_Pnt(vertex->point[0], vertex->point[1],
                 vertex->point[2]));
         }
 
+        sort(vertices.begin(), vertices.end(),
+            PolygonVertexSortComparator(vertices));
+
+        BRepBuilderAPI_MakePolygon poly_maker;
+        for (size_t i = 0; i < vertices.size(); ++i) {
+            poly_maker.Add(vertices[i]);
+        }
         poly_maker.Close();
 
         sewing.Add(BRepBuilderAPI_MakeFace(poly_maker.Wire()).Face());
