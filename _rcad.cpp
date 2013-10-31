@@ -46,6 +46,13 @@ Data_Type<TopoDS_Shape> rb_cRenderedShape;
 Class rb_cShape;
 
 
+// for debugging
+std::ostream &operator <<(std::ostream &lhs, gp_Pnt rhs)
+{
+    return lhs << "(" << rhs.X() << "," << rhs.Y() << "," << rhs.Z() << ")";
+}
+
+
 void translate_oce_exception(const Standard_Failure &e)
 {
     //Data_Object<Standard_Failure> e_obj(
