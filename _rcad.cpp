@@ -17,6 +17,7 @@
 #include <BRepBuilderAPI_MakeEdge2d.hxx>
 #include <BRepBuilderAPI_MakeEdge.hxx>
 #include <BRepBuilderAPI_MakeWire.hxx>
+#include <BRepBuilderAPI_MakePolygon.hxx>
 #include <BRepBuilderAPI_MakeFace.hxx>
 #include <BRepBuilderAPI_MakeSolid.hxx>
 #include <BRepBuilderAPI_Transform.hxx>
@@ -466,24 +467,17 @@ static TopoDS_Solid make_solid_from_qhull()
 
     facetT *facet;
     FORALLfacets {
-        BRepBuilderAPI_MakeWire wire_maker;
+        BRepBuilderAPI_MakePolygon poly_maker;
 
         vertexT *vertex, **vertexp;
         FOREACHvertex_(facet->vertices) {
-            gp_Pnt p1(vertex->point[0], vertex->point[1], vertex->point[2]);
-
-            vertexT *next_vertex =
-                (NULL == *vertexp)
-                ? SETfirstt_(facet->vertices, vertexT)
-                : (*vertexp);
-
-            gp_Pnt p2(next_vertex->point[0], next_vertex->point[1],
-                next_vertex->point[2]);
-
-            wire_maker.Add(BRepBuilderAPI_MakeEdge(p1, p2).Edge());
+            poly_maker.Add(gp_Pnt(vertex->point[0], vertex->point[1],
+                vertex->point[2]));
         }
 
-        sewing.Add(BRepBuilderAPI_MakeFace(wire_maker.Wire()).Face());
+        poly_maker.Close();
+
+        sewing.Add(BRepBuilderAPI_MakeFace(poly_maker.Wire()).Face());
     }
 
     sewing.Perform();
