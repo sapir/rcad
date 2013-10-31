@@ -500,30 +500,36 @@ static TopoDS_Solid make_solid_from_qhull()
 
 static Object _hull(Array shapes)
 {
-    std::vector<gp_Pnt> points = get_points_from_shapes(shapes);
+    try {
+        std::vector<gp_Pnt> points = get_points_from_shapes(shapes);
 
-    char flags[128];
-    strcpy(flags, "qhull Qt");
-    int err = qh_new_qhull(3, points.size(),
-        // each point contains a gp_XYZ which contains X,Y,Z as Standard_Reals
-        reinterpret_cast<Standard_Real*>(points.data()),
-        false, flags, NULL, stderr);
-    if (err) {
-        throw Exception(rb_cOCEError, "Error running qhull");
+        char flags[128];
+        strcpy(flags, "qhull Qt");
+        int err = qh_new_qhull(3, points.size(),
+            // each point contains a gp_XYZ which contains X,Y,Z as Standard_Reals
+            reinterpret_cast<Standard_Real*>(points.data()),
+            false, flags, NULL, stderr);
+        if (err) {
+            throw Exception(rb_cOCEError, "Error running qhull");
+        }
+
+        TopoDS_Solid solid = make_solid_from_qhull();
+
+        qh_freeqhull(!qh_ALL);
+        int curlong, totlong;
+        qh_memfreeshort(&curlong, &totlong);
+        if (curlong || totlong) {
+            throw Exception(rb_cOCEError,
+                "did not free %d bytes of long memory (%d pieces)",
+                totlong, curlong);
+        }
+
+        return wrap_rendered_shape(solid);
+    } catch (const Standard_Failure &e) {
+        // this throws an exception, so return won't be reached
+        translate_oce_exception(e);
+        return Object(Qnil);
     }
-
-    TopoDS_Solid solid = make_solid_from_qhull();
-
-    qh_freeqhull(!qh_ALL);
-    int curlong, totlong;
-    qh_memfreeshort(&curlong, &totlong);
-    if (curlong || totlong) {
-        throw Exception(rb_cOCEError,
-            "did not free %d bytes of long memory (%d pieces)",
-            totlong, curlong);
-    }
-
-    return wrap_rendered_shape(solid);
 }
 
 
