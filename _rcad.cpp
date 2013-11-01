@@ -341,7 +341,7 @@ Object torus_render(Object self)
 {
     Standard_Real inner_dia = from_ruby<Standard_Real>(
         self.iv_get("@inner_dia"));
-    
+
     Standard_Real outer_dia = from_ruby<Standard_Real>(
         self.iv_get("@outer_dia"));
 
@@ -418,7 +418,7 @@ Object revolution_render(Object self)
 {
     Object profile = self.iv_get("@profile");
     Data_Object<TopoDS_Shape> shape = render_shape(profile);
-    
+
     Object angle = self.iv_get("@angle");
     if (angle.is_nil()) {
         return to_ruby(
@@ -494,7 +494,7 @@ public:
         center.Scale(gp::Origin(), 1.0/vertices.size());
 
         center_to_first_vert = gp_Vec(center, vertices[0]);
-        
+
         // TODO: ensure that normals are all in consistent direction
         // by specifying a point that should be on the front or back side of
         // the polygon
@@ -525,7 +525,7 @@ public:
 private:
     double get_angle_to_vec(gp_Pnt vertex) {
         gp_Vec center_to_vertex(center, vertex);
-        
+
         // use normal as reference to define positive rotation angle
         return center_to_first_vert.AngleWithRef(center_to_vertex, normal);
     }
@@ -570,7 +570,7 @@ static TopoDS_Solid make_solid_from_qhull()
     // TODO: check for free/multiple edges and problems from sewing object
 
     TopoDS_Solid solid = BRepBuilderAPI_MakeSolid(shell).Solid();
-    
+
     fix_inside_out_solid(solid);
 
     return solid;
