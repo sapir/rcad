@@ -202,7 +202,7 @@ end
 at_exit do
   if $shape && ($! == nil)
     output_file = File.basename($0, ".*") + ".stl"
-    printf("Writing '%s'\n", output_file)
+    printf("Rendering '%s'\n", output_file)
     write_stl(output_file)
   end
 end
