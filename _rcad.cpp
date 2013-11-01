@@ -269,8 +269,8 @@ Object circle_render(Object self)
 Object box_render(Object self)
 {
     Standard_Real xsize = from_ruby<Standard_Real>(self.iv_get("@xsize"));
-    Standard_Real ysize = from_ruby<Standard_Real>(self.iv_get("@zsize"));
-    Standard_Real zsize = from_ruby<Standard_Real>(self.iv_get("@ysize"));
+    Standard_Real ysize = from_ruby<Standard_Real>(self.iv_get("@ysize"));
+    Standard_Real zsize = from_ruby<Standard_Real>(self.iv_get("@zsize"));
 
     return to_ruby(BRepPrimAPI_MakeBox(xsize, ysize, zsize).Shape());
 }
