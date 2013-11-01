@@ -493,8 +493,27 @@ public:
         }
         center.Scale(gp::Origin(), 1.0/vertices.size());
 
-        // get one of the vectors
         center_to_first_vert = gp_Vec(center, vertices[0]);
+        
+        // TODO: ensure that normals are all in consistent direction
+        // by specifying a point that should be on the front or back side of
+        // the polygon
+
+        // get a normal with one of the other vectors
+        // (must find a non-zero normal, i.e. other vector must not be
+        // parallel to first vector)
+        for (size_t i = 1; i < vertices.size(); ++i) {
+            gp_Vec another_vec = gp_Vec(center, vertices[i]);
+            normal = center_to_first_vert ^ another_vec;
+            if (normal.Magnitude() > Precision::Confusion()) {
+                break;
+            }
+        }
+
+        if (normal.Magnitude() <= Precision::Confusion()) {
+            // couldn't find a non-zero normal. normal still zero
+            throw std::exception();
+        }
     }
 
     bool operator() (gp_Pnt a, gp_Pnt b) {
@@ -504,14 +523,17 @@ public:
     }
 
 private:
-    bool get_angle_to_vec(gp_Pnt vertex) {
+    double get_angle_to_vec(gp_Pnt vertex) {
         gp_Vec center_to_vertex(center, vertex);
-        return center_to_first_vert.Angle(center_to_vertex);
+        
+        // use normal as reference to define positive rotation angle
+        return center_to_first_vert.AngleWithRef(center_to_vertex, normal);
     }
 
     std::vector<gp_Pnt> vertices;
     gp_Pnt center;
     gp_Vec center_to_first_vert;
+    gp_Vec normal;
 };
 
 static TopoDS_Solid make_solid_from_qhull()
