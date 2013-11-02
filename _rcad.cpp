@@ -509,6 +509,7 @@ Object linear_extrusion_render(Object self)
     } else {
         BRep_Builder builder;
         TopoDS_Compound compound;
+        builder.MakeCompound(compound);
 
         TopExp_Explorer texp;
         for (texp.Init(*shape, TopAbs_FACE); texp.More(); texp.Next()) {
