@@ -2,7 +2,10 @@
 #include <gp_Pnt.hxx>
 #include <gp_Vec.hxx>
 #include <gp_Circ.hxx>
+#include <TColgp_Array2OfPnt.hxx>
 #include <Poly_Triangulation.hxx>
+#include <Geom_BezierSurface.hxx>
+#include <GCE2d_MakeSegment.hxx>
 #include <TopoDS.hxx>
 #include <BRepPrimAPI_MakeBox.hxx>
 #include <BRepPrimAPI_MakeCylinder.hxx>
@@ -10,6 +13,7 @@
 #include <BRepPrimAPI_MakeTorus.hxx>
 #include <BRepPrimAPI_MakePrism.hxx>
 #include <BRepPrimAPI_MakeRevol.hxx>
+#include <BRepOffsetAPI_MakePipeShell.hxx>
 #include <BRepAlgoAPI_Fuse.hxx>
 #include <BRepAlgoAPI_Cut.hxx>
 #include <BRepAlgoAPI_Common.hxx>
@@ -409,8 +413,54 @@ static bool is_inner_wire_of_face(TopoDS_Wire wire, TopoDS_Face face)
 static TopoDS_Shape twist_extrude_wire(TopoDS_Wire wire, Standard_Real height,
     Standard_Real twist)
 {
-    // TODO
-    return TopoDS_Shape();
+    // split height into segments. each segment will twist no more than
+    // 90 degrees.
+    const int num_twist_segments = (int)(fabs(twist) / M_PI_2 + 1);
+    // note that height and twist are doubles so division is not integer
+    // division
+    const Standard_Real seg_height = height / num_twist_segments;
+    const Standard_Real seg_twist = twist / num_twist_segments;
+
+    Handle_Geom_BezierSurface surf_hnd(
+        new Geom_BezierSurface(
+            TColgp_Array2OfPnt(
+                1, num_twist_segments + 1,
+                1, 2)));
+
+    for (int i = 1; i <= num_twist_segments + 1; ++i) {
+        const Standard_Real z = seg_height * (i - 1);
+        const Standard_Real angle = seg_twist * (i - 1);
+        surf_hnd->SetPole(i, 1, gp_Pnt(0, 0, z));
+        surf_hnd->SetPole(i, 2, gp_Pnt(cos(angle), sin(angle), z));
+    }
+
+    TopoDS_Face spine_support =
+        // TODO: tolerance
+        BRepBuilderAPI_MakeFace(surf_hnd, 0, 1, 0, 1,
+            Precision::Confusion());
+
+    Handle_Geom2d_Curve uv_curve_hnd =
+        GCE2d_MakeSegment(gp_Pnt2d(0, 0), gp_Pnt2d(1, 0));
+    TopoDS_Edge spine = BRepBuilderAPI_MakeEdge(uv_curve_hnd, surf_hnd);
+    TopoDS_Wire spine_wire = BRepBuilderAPI_MakeWire(spine);
+
+
+    BRepOffsetAPI_MakePipeShell pipe_maker(spine_wire);
+
+    if (!pipe_maker.SetMode(spine_support)) {
+        throw Exception(rb_cOCEError,
+            "failed setting twisted surface-normal for PipeShell");
+    }
+
+    pipe_maker.Add(wire);
+    pipe_maker.SetTolerance(0.05, 0.05);        // TODO: tolerance
+    pipe_maker.Build();
+
+    if (!pipe_maker.MakeSolid()) {
+        throw Exception(rb_cOCEError, "failed making extrusion solid");
+    }
+
+    return pipe_maker.Shape();
 }
 
 static TopoDS_Shape twist_extrude_face(TopoDS_Face face, Standard_Real height,
