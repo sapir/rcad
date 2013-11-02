@@ -137,7 +137,7 @@ class HerringboneGear < Shape
     @shape = add do
         ~helical_gear
         ~helical_gear
-          .scale_z(-1)
+          .mirror_z
           .move_z(height)
       end
   end
