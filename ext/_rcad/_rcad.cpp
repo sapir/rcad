@@ -199,6 +199,16 @@ Object shape_scale(Object self, Standard_Real x, Standard_Real y,
         BRepBuilderAPI_GTransform(*rendered, transform, Standard_True).Shape());
 }
 
+Object shape_mirror(Object self, Standard_Real x, Standard_Real y,
+    Standard_Real z)
+{
+    gp_Ax2 mirror_plane(gp::Origin(), gp_Dir(x, y, z));
+
+    gp_Trsf transform;
+    transform.SetMirror(mirror_plane);
+    return shape_transform(self, transform);
+}
+
 void shape_write_stl(Object self, String path)
 {
     Data_Object<TopoDS_Shape> shape = render_shape(self);
@@ -735,6 +745,7 @@ void Init__rcad()
         .define_method("move", &shape_move)
         .define_method("rotate", &shape_rotate)
         .define_method("scale", &shape_scale)
+        .define_method("mirror", &shape_mirror)
         .define_method("write_stl", &shape_write_stl)
         .define_singleton_method("from_stl", &shape_from_stl);
 
