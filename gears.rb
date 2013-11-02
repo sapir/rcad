@@ -116,7 +116,7 @@ class HelicalGear < Shape
     @helix_angle = helix_angle
     @profile = GearProfile.new(pitch_dia)
 
-    @shape = profile.extrude(height, :twist=>twist)
+    @shape = profile.extrude(height, twist)
   end
 
   def twist
