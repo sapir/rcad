@@ -14,7 +14,6 @@
 #include <BRepAlgoAPI_Cut.hxx>
 #include <BRepAlgoAPI_Common.hxx>
 #include <BRepAlgoAPI_Common.hxx>
-#include <BRepBuilderAPI_MakeEdge2d.hxx>
 #include <BRepBuilderAPI_MakeEdge.hxx>
 #include <BRepBuilderAPI_MakeWire.hxx>
 #include <BRepBuilderAPI_MakePolygon.hxx>
@@ -248,11 +247,11 @@ Object polygon_render(Object self)
     }
 
     BRepBuilderAPI_MakeFace face_maker(
-        make_wire_from_path<gp_Pnt2d, BRepBuilderAPI_MakeEdge2d>(
+        make_wire_from_path<gp_Pnt, BRepBuilderAPI_MakeEdge>(
             points, paths[0]));
     for (size_t i = 1; i < paths.size(); ++i) {
-        TopoDS_Wire wire = make_wire_from_path<gp_Pnt2d,
-            BRepBuilderAPI_MakeEdge2d>(points, paths[i]);
+        TopoDS_Wire wire = make_wire_from_path<gp_Pnt,
+            BRepBuilderAPI_MakeEdge>(points, paths[i]);
 
         // all paths except the first are inner loops,
         // so they should be reversed
