@@ -111,7 +111,7 @@ end
 class HelicalGear < Shape
   attr_reader :height, :helix_angle, :profile
 
-  def initialize(pitch_dia, height, helix_angle=60)
+  def initialize(pitch_dia, height, helix_angle=Math::PI / 3.0)
     @height = height
     @helix_angle = helix_angle
     @profile = GearProfile.new(pitch_dia)
@@ -131,14 +131,14 @@ end
 class HerringboneGear < Shape
   attr_reader :helical_gear
 
-  def initialize(*args)
-    @helical_gear = HelicalGear.new(*args)
+  def initialize(pitch_dia, height, helix_angle=Math::PI / 3.0)
+    @helical_gear = HelicalGear.new(pitch_dia, height / 2.0, helix_angle)
 
     @shape = add do
         ~helical_gear
         ~helical_gear
           .scale_z(-1)
-          .move_z(helical_gear.height)
+          .move_z(height)
       end
   end
 end
