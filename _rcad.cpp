@@ -24,6 +24,7 @@
 #include <BRepBuilderAPI_GTransform.hxx>
 #include <BRepBuilderAPI_Sewing.hxx>
 #include <BRepClass3d_SolidClassifier.hxx>
+#include <BRepTopAdaptor_FClass2d.hxx>
 #include <BRepMesh_IncrementalMesh.hxx>
 #include <StlAPI_Reader.hxx>
 #include <StlAPI_Writer.hxx>
@@ -391,6 +392,19 @@ Object intersection_render(Object self)
         BRepAlgoAPI_Common(*shape_a, *shape_b).Shape());
 }
 
+
+static bool is_inner_wire_of_face(TopoDS_Wire wire, TopoDS_Face face)
+{
+    // recipe from http://opencascade.wikidot.com/recipes
+    TopoDS_Face newface = TopoDS::Face(
+        face.EmptyCopied().Oriented(TopAbs_FORWARD));
+
+    BRep_Builder builder;
+    builder.Add(newface, wire);
+
+    BRepTopAdaptor_FClass2d fclass2D(newface, Precision::PConfusion());
+    return (fclass2D.PerformInfinitePoint() != TopAbs_OUT);
+}
 
 static TopoDS_Shape twist_extrude_wire(TopoDS_Wire wire, Standard_Real height,
     Standard_Real twist)
