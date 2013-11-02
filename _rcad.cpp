@@ -216,7 +216,6 @@ Object shape_from_stl(String path)
 }
 
 
-template<class PointType, class EdgeMakerType>
 static TopoDS_Wire make_wire_from_path(Array points, Array path)
 {
     BRepBuilderAPI_MakeWire wire_maker;
@@ -227,10 +226,10 @@ static TopoDS_Wire make_wire_from_path(Array points, Array path)
         const size_t p1_idx = from_ruby<size_t>(path[i]);
         const size_t p2_idx = from_ruby<size_t>(path[j]);
 
-        PointType gp_p1(from_ruby<PointType>(points[p1_idx]));
-        PointType gp_p2(from_ruby<PointType>(points[p2_idx]));
+        gp_Pnt gp_p1(from_ruby<gp_Pnt>(points[p1_idx]));
+        gp_Pnt gp_p2(from_ruby<gp_Pnt>(points[p2_idx]));
 
-        wire_maker.Add(EdgeMakerType(gp_p1, gp_p2).Edge());
+        wire_maker.Add(BRepBuilderAPI_MakeEdge(gp_p1, gp_p2).Edge());
     }
 
     return wire_maker.Wire();
@@ -247,11 +246,9 @@ Object polygon_render(Object self)
     }
 
     BRepBuilderAPI_MakeFace face_maker(
-        make_wire_from_path<gp_Pnt, BRepBuilderAPI_MakeEdge>(
-            points, paths[0]));
+        make_wire_from_path(points, paths[0]));
     for (size_t i = 1; i < paths.size(); ++i) {
-        TopoDS_Wire wire = make_wire_from_path<gp_Pnt,
-            BRepBuilderAPI_MakeEdge>(points, paths[i]);
+        TopoDS_Wire wire = make_wire_from_path(points, paths[i]);
 
         // all paths except the first are inner loops,
         // so they should be reversed
@@ -316,8 +313,7 @@ static Object polyhedron_render_internal(const Array points, const Array faces)
     BRepBuilderAPI_Sewing sewing;
 
     for (size_t i = 0; i < faces.size(); ++i) {
-        TopoDS_Wire wire = make_wire_from_path<gp_Pnt,
-            BRepBuilderAPI_MakeEdge>(points, faces[i]);
+        TopoDS_Wire wire = make_wire_from_path(points, faces[i]);
 
         sewing.Add(BRepBuilderAPI_MakeFace(wire).Face());
     }
