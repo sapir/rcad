@@ -19,4 +19,4 @@ have_library('TKBO') or raise
 have_library('TKSTL') or raise
 have_library('qhull') or raise
 
-create_makefile('_rcad')
+create_makefile('rcad/_rcad')
