@@ -102,6 +102,18 @@ class Shape
     scale(1, 1, factor)
   end
 
+  def mirror_x
+    mirror(1, 0, 0)
+  end
+
+  def mirror_y
+    mirror(0, 1, 0)
+  end
+
+  def mirror_z
+    mirror(0, 0, 1)
+  end
+
   def extrude(height, twist=0)
     LinearExtrusion.new(self, height, twist)
   end
