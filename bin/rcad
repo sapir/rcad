@@ -1,0 +1,17 @@
+#!/usr/bin/env ruby
+
+require 'rcad'
+require 'rcad/gears'
+require 'rcad/nuts'
+
+ARGV.each do |filename|
+  load(filename, true)
+
+  if $shape
+    output_file = File.basename(filename, ".*") + ".stl"
+    printf("Rendering '%s'\n", output_file)
+    write_stl(output_file)
+
+    clear_shape
+  end
+end
