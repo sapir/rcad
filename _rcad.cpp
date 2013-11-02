@@ -433,7 +433,7 @@ static TopoDS_Shape twist_extrude_face(TopoDS_Face face, Standard_Real height,
         TopoDS_Wire wire = TopoDS::Wire(texp.Current());
         TopoDS_Shape ext_wire = twist_extrude_wire(wire, height, twist);
 
-        if (false) { // TODO: if is inner...
+        if (is_inner_wire_of_face(wire, orface)) {
             builder.Add(inner, ext_wire);
         } else {
             outer = ext_wire;
