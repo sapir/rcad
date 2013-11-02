@@ -1,3 +1,4 @@
+require 'rcad/version'
 require 'rcad/_rcad'
 
 
