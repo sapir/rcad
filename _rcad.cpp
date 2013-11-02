@@ -392,6 +392,13 @@ Object intersection_render(Object self)
 }
 
 
+static TopoDS_Shape twist_extrude_face(TopoDS_Face face, Standard_Real height,
+    Standard_Real twist)
+{
+    // TODO
+    return TopoDS_Shape();
+}
+
 // initialize is defined in Ruby code
 Object linear_extrusion_render(Object self)
 {
@@ -406,10 +413,18 @@ Object linear_extrusion_render(Object self)
             BRepPrimAPI_MakePrism(*shape, gp_Vec(0, 0, height),
                 Standard_True).Shape());
     } else {
-        // TODO
-    }
+        BRep_Builder builder;
+        TopoDS_Compound compound;
 
-    return Object();
+        TopExp_Explorer texp;
+        for (texp.Init(*shape, TopAbs_FACE); tExp.More(); tExp.Next()) {
+            builder.Add(compound,
+                twist_extrude_face(
+                    TopoDS::Face(texp.Current()), height, twist));
+        }
+
+        return wrap_rendered_shape(compound);
+    }
 }
 
 
