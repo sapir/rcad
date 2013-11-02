@@ -6,7 +6,7 @@
 # * http://www.metrication.com/engineering/gears.html
 
 
-require_relative "rcad"
+require 'rcad'
 
 
 class GearProfile < Shape

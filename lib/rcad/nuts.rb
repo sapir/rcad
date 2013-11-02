@@ -1,6 +1,6 @@
 # calculations are (mostly) from OpenSCAD MCAD library
 
-require_relative 'rcad'
+require 'rcad'
 
 
 class BaseBoltPart < Shape

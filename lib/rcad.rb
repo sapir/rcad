@@ -1,4 +1,4 @@
-require_relative '_rcad'
+require 'rcad/_rcad'
 
 
 class Numeric
