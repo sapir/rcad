@@ -1,7 +1,7 @@
 require 'mkmf-rice'
 
-OCE_INCLUDE_DIR = '/usr/local/include/oce'
-OCE_LIB_DIR = '/usr/local/lib'
+OCE_INCLUDE_DIR = '/usr/include/oce'
+OCE_LIB_DIR = '/usr/lib'
 
 dir_config('TKG3d', OCE_INCLUDE_DIR, OCE_LIB_DIR)
 dir_config('TKBRep', OCE_INCLUDE_DIR, OCE_LIB_DIR)
