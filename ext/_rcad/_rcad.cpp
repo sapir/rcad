@@ -588,7 +588,7 @@ static std::vector<gp_Pnt> get_points_from_shapes(Array shapes)
 {
     std::vector<gp_Pnt> points;
 
-    const tolerance = get_tolerance();
+    const Standard_Real tolerance = get_tolerance();
 
     for (size_t i = 0; i < shapes.size(); ++i) {
         Data_Object<TopoDS_Shape> shape_obj = render_shape(shapes[i]);
