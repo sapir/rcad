@@ -222,7 +222,7 @@ void shape_write_stl(Object self, String path)
     StlAPI_Writer writer;
     writer.ASCIIMode() = false;
     writer.RelativeMode() = false;
-    writer.SetDeflection(0.05);     // TODO: deflection param
+    writer.SetDeflection(get_tolerance());
     writer.Write(*shape, path.c_str());
 }
 
@@ -469,7 +469,8 @@ static TopoDS_Shape twist_extrude_wire(TopoDS_Wire wire, Standard_Real height,
     }
 
     pipe_maker.Add(wire);
-    pipe_maker.SetTolerance(0.05, 0.05);        // TODO: tolerance
+    const Standard_Real tolerance = get_tolerance();
+    pipe_maker.SetTolerance(tolerance, tolerance);
     pipe_maker.Build();
 
     if (!pipe_maker.MakeSolid()) {
@@ -587,11 +588,13 @@ static std::vector<gp_Pnt> get_points_from_shapes(Array shapes)
 {
     std::vector<gp_Pnt> points;
 
+    const tolerance = get_tolerance();
+
     for (size_t i = 0; i < shapes.size(); ++i) {
         Data_Object<TopoDS_Shape> shape_obj = render_shape(shapes[i]);
         const TopoDS_Shape &shape = *shape_obj;
 
-        BRepMesh_IncrementalMesh(shape, 0.05);      // TODO: tolerance
+        BRepMesh_IncrementalMesh(shape, tolerance);
 
         get_points_from_shape(shape, points);
     }
