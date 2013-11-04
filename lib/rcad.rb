@@ -29,12 +29,13 @@ class Numeric
 end
 
 
+# global tolerance value used by C++ extension when rendering shapes
+$tol = 50.um
+
+
 def to_polar(r, a)
   return [r * Math::cos(a), r * Math::sin(a)]
 end
-
-
-TOLERANCE = 50.um
 
 
 class Shape
