@@ -129,6 +129,12 @@ gp_Dir from_ruby<gp_Dir>(Object obj)
 }
 
 
+static Standard_Real get_tolerance()
+{
+    return from_ruby<Standard_Real>(
+        Object(rb_gv_get("$tol")));
+}
+
 static Data_Object<TopoDS_Shape> render_shape(Object shape)
 {
     if (shape.is_a(rb_cRenderedShape)) {
