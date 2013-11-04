@@ -246,13 +246,25 @@ class RegularPolygon < Polygon
 end
 
 
-class Square < Polygon
+class Rectangle < Polygon
+  attr_reader :xsize, :ysize
+
+  def initialize(xsize, ysize)
+    @xsize = xsize
+    @ysize = ysize
+
+    super([[0,0], [xsize,0], [xsize,ysize], [0,ysize]])
+  end
+end
+
+
+class Square < Rectangle
   attr_reader :size
 
   def initialize(size)
     @size = size
 
-    super([[0,0], [size,0], [size,size], [0,size]])
+    super(size, size)
   end
 end
 
@@ -384,6 +396,7 @@ end
 
 make_maker :polygon, Polygon
 make_maker :reg_poly, RegularPolygon
+make_maker :rectangle, Rectangle
 make_maker :square, Square
 make_maker :circle, Circle
 make_maker :text, Text
