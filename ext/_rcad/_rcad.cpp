@@ -8,6 +8,7 @@
 #include <GCE2d_MakeSegment.hxx>
 #include <TopoDS.hxx>
 #include <BRepPrimAPI_MakeBox.hxx>
+#include <BRepPrimAPI_MakeCone.hxx>
 #include <BRepPrimAPI_MakeCylinder.hxx>
 #include <BRepPrimAPI_MakeSphere.hxx>
 #include <BRepPrimAPI_MakeTorus.hxx>
@@ -295,6 +296,16 @@ Object box_render(Object self)
     Standard_Real zsize = from_ruby<Standard_Real>(self.iv_get("@zsize"));
 
     return to_ruby(BRepPrimAPI_MakeBox(xsize, ysize, zsize).Shape());
+}
+
+
+Object cone_render(Object self)
+{
+    Standard_Real height = from_ruby<Standard_Real>(self.iv_get("@height"));
+    Standard_Real dia1 = from_ruby<Standard_Real>(self.iv_get("@bottom_dia"));
+    Standard_Real dia2 = from_ruby<Standard_Real>(self.iv_get("@top_dia"));
+    return to_ruby(
+        BRepPrimAPI_MakeCone(dia1 / 2.0, dia2 / 2.0, height).Shape());
 }
 
 
@@ -770,6 +781,10 @@ void Init__rcad()
     Class rb_cBox = define_class("Box", rb_cShape)
         .add_handler<Standard_Failure>(translate_oce_exception)
         .define_method("render", &box_render);
+
+    Class rb_cCone = define_class("Cone", rb_cShape)
+        .add_handler<Standard_Failure>(translate_oce_exception)
+        .define_method("render", &cone_render);
 
     Class rb_cCylinder = define_class("Cylinder", rb_cShape)
         .add_handler<Standard_Failure>(translate_oce_exception)

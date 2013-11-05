@@ -64,6 +64,7 @@ class Shape
       $shape = ($shape == nil) ? self : $shape.send($shape_mode, self)
     end
 
+    p self
     self
   end
 
@@ -300,6 +301,25 @@ class Cube < Box
 end
 
 
+class Cone < Shape
+  attr_accessor :height, :bottom_dia, :top_dia
+
+  def initialize(height, bottom_dia, top_dia=0)
+    @height = height
+    @bottom_dia = bottom_dia
+    @top_dia = top_dia
+  end
+
+  def bottom_radius
+    bottom_dia / 2.0
+  end
+
+  def top_radius
+    top_dia / 2.0
+  end
+end
+
+
 class Cylinder < Shape
   attr_accessor :height, :dia
 
@@ -403,6 +423,7 @@ make_maker :text, Text
 
 make_maker :box, Box
 make_maker :cube, Cube
+make_maker :cone, Cone
 make_maker :cylinder, Cylinder
 make_maker :sphere, Sphere
 make_maker :polyhedron, Polyhedron
