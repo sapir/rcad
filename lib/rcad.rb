@@ -132,40 +132,40 @@ class Shape
     @bbox
   end
 
-  def min_x
+  def minx
     bbox[0][0]
   end
 
-  def min_y
+  def miny
     bbox[0][1]
   end
 
-  def min_z
+  def minz
     bbox[0][2]
   end
 
-  def max_x
+  def maxx
     bbox[1][0]
   end
 
-  def max_y
+  def maxy
     bbox[1][1]
   end
 
-  def max_z
+  def maxz
     bbox[1][2]
   end
 
-  def x_size
-    max_x - min_x
+  def xsize
+    maxx - minx
   end
 
-  def y_size
-    max_y - min_y
+  def ysize
+    maxy - miny
   end
 
-  def z_size
-    max_z - min_z
+  def zsize
+    maxz - minz
   end
 end
 
