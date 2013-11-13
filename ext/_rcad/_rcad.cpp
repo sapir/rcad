@@ -170,10 +170,17 @@ static gp_GTrsf transform_scale(gp_GTrsf self)
     return gtrsf;
 }
 
-static gp_GTrsf transform_mirror(gp_GTrsf self)
+static gp_GTrsf transform_mirror(gp_GTrsf self,
+    Standard_Real x, Standard_Real y, Standard_Real z)
 {
-    // TODO
-    return self;
+    gp_Ax2 mirror_plane(gp::Origin(), gp_Dir(x, y, z));
+
+    gp_Trsf mirror;
+    mirror.SetMirror(mirror_plane);
+
+    gp_GTrsf gtrsf(mirror);
+    gtrsf.Multiply(self);       // gtrsf * self
+    return gtrsf;
 }
 
 
