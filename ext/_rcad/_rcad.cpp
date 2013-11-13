@@ -143,7 +143,7 @@ static gp_GTrsf transform_move(gp_GTrsf self, Standard_Real x, Standard_Real y,
 {
     gp_GTrsf gtrsf;
     gtrsf.SetTranslationPart(gp_XYZ(x, y, z));
-    gtrsf.Multiply(self);       // gtrsf * self
+    gtrsf.Multiply(self);       // gtrsf *= self
     return gtrsf;
 }
 
@@ -154,7 +154,7 @@ static gp_GTrsf transform_rotate(gp_GTrsf self, Standard_Real angle,
     rot.SetRotation(gp_Ax1(gp_Pnt(), axis), angle);
 
     gp_GTrsf gtrsf(rot);
-    gtrsf.Multiply(self);
+    gtrsf.Multiply(self);       // gtrsf *= self
     return gtrsf;
 }
 
@@ -166,7 +166,7 @@ static gp_GTrsf transform_scale(gp_GTrsf self)
                0, y, 0,
                0, 0, z));
 
-    gtrsf.Multiply(self);       // gtrsf * self
+    gtrsf.Multiply(self);       // gtrsf *= self
     return gtrsf;
 }
 
@@ -179,7 +179,7 @@ static gp_GTrsf transform_mirror(gp_GTrsf self,
     mirror.SetMirror(mirror_plane);
 
     gp_GTrsf gtrsf(mirror);
-    gtrsf.Multiply(self);       // gtrsf * self
+    gtrsf.Multiply(self);       // gtrsf *= self
     return gtrsf;
 }
 
