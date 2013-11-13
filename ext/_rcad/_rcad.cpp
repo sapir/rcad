@@ -779,8 +779,7 @@ static Object _hull(Array shapes)
 extern "C"
 void Init__rcad()
 {
-    Data_Type<TopoDS_Shape> rb_cRenderedShape =
-        define_class<TopoDS_Shape>("RenderedShape");
+    rb_cRenderedShape = define_class<TopoDS_Shape>("RenderedShape");
 
     Data_Type<Standard_Failure> rb_cOCEError =
         define_class("OCEError", rb_eRuntimeError);
