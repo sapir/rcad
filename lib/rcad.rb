@@ -125,7 +125,11 @@ class Shape
   end
 
   def bbox
-    # TODO
+    if @bbox == nil
+      @bbox = _bbox
+    end
+
+    @bbox
   end
 
   def min_x

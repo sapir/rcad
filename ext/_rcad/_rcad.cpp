@@ -30,6 +30,7 @@
 #include <BRepClass3d_SolidClassifier.hxx>
 #include <BRepTopAdaptor_FClass2d.hxx>
 #include <BRepMesh_IncrementalMesh.hxx>
+#include <BRepBndLib.hxx>
 #include <StlAPI_Reader.hxx>
 #include <StlAPI_Writer.hxx>
 #include <Standard_Failure.hxx>
@@ -225,6 +226,30 @@ void shape_write_stl(Object self, String path)
     writer.RelativeMode() = false;
     writer.SetDeflection(get_tolerance());
     writer.Write(*shape, path.c_str());
+}
+
+Object shape__bbox(Object self)
+{
+    Data_Object<TopoDS_Shape> shape = render_shape(self);
+
+    Standard_Real minXYZ[3];
+    Standard_Real maxXYZ[3];
+    Bnd_Box bbox;
+    BRepBndLib::Add(*shape, bbox);
+    bbox.Get(
+        minXYZ[0], minXYZ[1], minXYZ[2],
+        maxXYZ[0], maxXYZ[1], maxXYZ[2]);
+    
+    const Standard_Real gap = bbox.GetGap();
+    for (int i = 0; i < 3; ++i) {
+        minXYZ[i] += gap;
+        maxXYZ[i] -= gap;
+    }
+
+    Array res;
+    res.push(Array(minXYZ));
+    res.push(Array(maxXYZ));
+    return res;
 }
 
 
@@ -767,6 +792,7 @@ void Init__rcad()
         .define_method("scale", &shape_scale)
         .define_method("mirror", &shape_mirror)
         .define_method("write_stl", &shape_write_stl)
+        .define_method("_bbox", &shape__bbox)
         .define_singleton_method("from_stl", &shape_from_stl);
 
     Class rb_cPolygon = define_class("Polygon", rb_cShape)
