@@ -252,6 +252,7 @@ end
 
 
 class Rectangle < Polygon
+  # These override Shape.xsize etc.
   attr_reader :xsize, :ysize
 
   def initialize(xsize, ysize)
@@ -289,6 +290,7 @@ end
 
 
 class Box < Shape
+  # These override Shape.xsize etc.
   attr_accessor :xsize, :ysize, :zsize
 
   def initialize(xsize, ysize, zsize)
