@@ -137,6 +137,35 @@ static Standard_Real get_tolerance()
         Object(rb_gv_get("$tol")));
 }
 
+
+static gp_GTrsf transform_move(gp_GTrsf self, Standard_Real x, Standard_Real y,
+    Standard_Real z)
+{
+    gp_GTrsf gtrsf;
+    gtrsf.SetTranslationPart(gp_XYZ(x, y, z));
+    gtrsf.Multiply(self);       // gtrsf * self
+    return gtrsf;
+}
+
+static gp_GTrsf transform_rotate(gp_GTrsf self)
+{
+    // TODO
+    return self;
+}
+
+static gp_GTrsf transform_scale(gp_GTrsf self)
+{
+    // TODO
+    return self;
+}
+
+static gp_GTrsf transform_mirror(gp_GTrsf self)
+{
+    // TODO
+    return self;
+}
+
+
 static Data_Object<TopoDS_Shape> render_shape(Object shape)
 {
     if (shape.is_a(rb_cRenderedShape)) {
@@ -783,6 +812,13 @@ void Init__rcad()
 
     Data_Type<Standard_Failure> rb_cOCEError =
         define_class("OCEError", rb_eRuntimeError);
+
+    Class rb_cTransform = define_class<gp_GTrsf>("Transform")
+        .add_handler<Standard_Failure>(translate_oce_exception)
+        .define_method("move", &transform_move)
+        .define_method("rotate", &transform_rotate)
+        .define_method("scale", &transform_scale)
+        .define_method("mirror", &transform_mirror);
 
     rb_cShape = define_class("Shape")
         .add_handler<Standard_Failure>(translate_oce_exception)
