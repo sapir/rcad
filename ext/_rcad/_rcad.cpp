@@ -839,6 +839,9 @@ void Init__rcad()
         .define_method("scale", &transform_scale)
         .define_method("mirror", &transform_mirror);
 
+    rb_const_set(rb_cObject, Identifier("I"), to_ruby<gp_GTrsf>(gp_GTrsf()));
+
+
     rb_cShape = define_class("Shape")
         .add_handler<Standard_Failure>(translate_oce_exception)
         .define_method("move", &shape_move)
