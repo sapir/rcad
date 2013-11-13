@@ -133,27 +133,27 @@ class Shape
   end
 
   def min_x
-    bbox[0].x
+    bbox[0][0]
   end
 
   def min_y
-    bbox[0].y
+    bbox[0][1]
   end
 
   def min_z
-    bbox[0].z
+    bbox[0][2]
   end
 
   def max_x
-    bbox[1].x
+    bbox[1][0]
   end
 
   def max_y
-    bbox[1].y
+    bbox[1][1]
   end
 
   def max_z
-    bbox[1].z
+    bbox[1][2]
   end
 
   def x_size
