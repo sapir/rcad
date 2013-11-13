@@ -158,7 +158,8 @@ static gp_GTrsf transform_rotate(gp_GTrsf self, Standard_Real angle,
     return gtrsf;
 }
 
-static gp_GTrsf transform_scale(gp_GTrsf self)
+static gp_GTrsf transform_scale(gp_GTrsf self,
+    Standard_Real x, Standard_Real y, Standard_Real z)
 {
     gp_GTrsf gtrsf;
     gtrsf.SetVectorialPart(
