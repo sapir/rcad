@@ -160,8 +160,14 @@ static gp_GTrsf transform_rotate(gp_GTrsf self, Standard_Real angle,
 
 static gp_GTrsf transform_scale(gp_GTrsf self)
 {
-    // TODO
-    return self;
+    gp_GTrsf gtrsf;
+    gtrsf.SetVectorialPart(
+        gp_Mat(x, 0, 0,
+               0, y, 0,
+               0, 0, z));
+
+    gtrsf.Multiply(self);       // gtrsf * self
+    return gtrsf;
 }
 
 static gp_GTrsf transform_mirror(gp_GTrsf self)
