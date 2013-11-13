@@ -147,10 +147,15 @@ static gp_GTrsf transform_move(gp_GTrsf self, Standard_Real x, Standard_Real y,
     return gtrsf;
 }
 
-static gp_GTrsf transform_rotate(gp_GTrsf self)
+static gp_GTrsf transform_rotate(gp_GTrsf self, Standard_Real angle,
+    gp_Dir axis)
 {
-    // TODO
-    return self;
+    gp_Trsf rot;
+    rot.SetRotation(gp_Ax1(gp_Pnt(), axis), angle);
+
+    gp_GTrsf gtrsf(rot);
+    gtrsf.Multiply(self);
+    return gtrsf;
 }
 
 static gp_GTrsf transform_scale(gp_GTrsf self)
