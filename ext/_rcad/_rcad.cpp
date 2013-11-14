@@ -287,10 +287,7 @@ Object shape_scale(Object self, Standard_Real x, Standard_Real y,
         gp_Mat(x, 0, 0,
                0, y, 0,
                0, 0, z));
-
-    Data_Object<TopoDS_Shape> rendered = render_shape(self);
-    return wrap_rendered_shape(
-        BRepBuilderAPI_GTransform(*rendered, transform, Standard_True).Shape());
+    return shape_transform_g(self, transform);
 }
 
 Object shape_mirror(Object self, Standard_Real x, Standard_Real y,
