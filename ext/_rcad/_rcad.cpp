@@ -1,3 +1,4 @@
+#include <sstream>
 #include <gp_Pnt2d.hxx>
 #include <gp_Pnt.hxx>
 #include <gp_Vec.hxx>
@@ -137,6 +138,29 @@ static Standard_Real get_tolerance()
         Object(rb_gv_get("$tol")));
 }
 
+
+static String transform_to_s(gp_GTrsf self)
+{
+    gp_Mat vec = self.VectorialPart();
+    gp_XYZ trn = self.TranslationPart();
+
+    std::stringstream s;
+    s << "#<Transform:";
+
+    for (int i = 1; i <= 3; ++i) {
+        for (int j = 1; j <= 3; ++j) {
+            s << vec(i, j)
+                << ((j < 3) ? ", " : "; ");
+        }
+    }
+
+    s << "x=" << trn.X()
+        << ", y=" << trn.Y()
+        << ", z=" << trn.Z();
+
+    s << ">";
+    return s.str();
+}
 
 static gp_GTrsf transform_move(gp_GTrsf self, Standard_Real x, Standard_Real y,
     Standard_Real z)
@@ -834,6 +858,7 @@ void Init__rcad()
 
     Class rb_cTransform = define_class<gp_GTrsf>("Transform")
         .add_handler<Standard_Failure>(translate_oce_exception)
+        .define_method("to_s", &transform_to_s)
         .define_method("move", &transform_move)
         .define_method("rotate", &transform_rotate)
         .define_method("scale", &transform_scale)
