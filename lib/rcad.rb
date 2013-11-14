@@ -242,6 +242,29 @@ class Shape
   def bottom
     I.move_z(minz)
   end
+
+  def xcenter
+    I.move_x((minx + maxx) / 2.0)
+  end
+
+  def ycenter
+    I.move_y((miny + maxy) / 2.0)
+  end
+
+  def zcenter
+    I.move_z((minz + maxz) / 2.0)
+  end
+
+  def center
+    I.move(
+      (minx + maxx) / 2.0,
+      (miny + maxy) / 2.0,
+      (minz + maxz) / 2.0)
+  end
+
+  def align(other, mine)
+    self.transform(mine.inverse).transform(other)
+  end
 end
 
 $shape_stack = []
