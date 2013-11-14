@@ -256,22 +256,19 @@ class Shape
   end
 
   def xcenter
-    I.move_x((minx + maxx) / 2.0)
+    I.move_x(cx)
   end
 
   def ycenter
-    I.move_y((miny + maxy) / 2.0)
+    I.move_y(cy)
   end
 
   def zcenter
-    I.move_z((minz + maxz) / 2.0)
+    I.move_z(cz)
   end
 
   def center
-    I.move(
-      (minx + maxx) / 2.0,
-      (miny + maxy) / 2.0,
-      (minz + maxz) / 2.0)
+    I.move(cx, cy, cz)
   end
 
   def align(other, mine)
