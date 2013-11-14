@@ -162,6 +162,13 @@ static String transform_to_s(gp_GTrsf self)
     return s.str();
 }
 
+static gp_GTrsf transform_multiply(gp_GTrsf self, gp_GTrsf right)
+{
+    gp_GTrsf gtrsf = self;
+    gtrsf.Multiply(right);
+    return gtrsf;
+}
+
 static gp_GTrsf transform_move(gp_GTrsf self, Standard_Real x, Standard_Real y,
     Standard_Real z)
 {
@@ -870,6 +877,7 @@ void Init__rcad()
     Class rb_cTransform = define_class<gp_GTrsf>("Transform")
         .add_handler<Standard_Failure>(translate_oce_exception)
         .define_method("to_s", &transform_to_s)
+        .define_method("*", &transform_multiply)
         .define_method("move", &transform_move)
         .define_method("rotate", &transform_rotate)
         .define_method("scale", &transform_scale)
