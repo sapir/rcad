@@ -257,6 +257,13 @@ static Object shape_transform(Object self, const gp_Trsf &transform)
         BRepBuilderAPI_Transform(*rendered, transform, Standard_True).Shape());
 }
 
+Object shape_transform_g(Object self, const gp_GTrsf &gtrsf)
+{
+    Data_Object<TopoDS_Shape> rendered = render_shape(self);
+    return wrap_rendered_shape(
+        BRepBuilderAPI_GTransform(*rendered, gtrsf, Standard_True).Shape());
+}
+
 Object shape_move(Object self, Standard_Real x, Standard_Real y,
     Standard_Real z)
 {
@@ -877,6 +884,7 @@ void Init__rcad()
 
     rb_cShape = define_class("Shape")
         .add_handler<Standard_Failure>(translate_oce_exception)
+        .define_method("transform", &shape_transform_g)
         .define_method("move", &shape_move)
         .define_method("rotate", &shape_rotate)
         .define_method("scale", &shape_scale)
