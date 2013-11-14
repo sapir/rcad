@@ -263,7 +263,7 @@ class Shape
   end
 
   def align(other, mine)
-    self.transform(mine.inverse).transform(other)
+    self.transform(other * mine.inverse)
   end
 end
 
