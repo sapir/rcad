@@ -218,6 +218,30 @@ class Shape
   def zsize
     maxz - minz
   end
+
+  def left
+    I.move_x(minx)
+  end
+
+  def right
+    I.move_x(maxx)
+  end
+
+  def front
+    I.move_y(miny)
+  end
+
+  def back
+    I.move_y(maxy)
+  end
+
+  def top
+    I.move_z(maxz)
+  end
+
+  def bottom
+    I.move_z(minz)
+  end
 end
 
 $shape_stack = []
