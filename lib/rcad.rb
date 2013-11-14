@@ -219,6 +219,18 @@ class Shape
     maxz - minz
   end
 
+  def cx
+    (minx + maxx) / 2.0
+  end
+
+  def cy
+    (miny + maxy) / 2.0
+  end
+
+  def cz
+    (minz + maxz) / 2.0
+  end
+
   def left
     I.move_x(minx)
   end
