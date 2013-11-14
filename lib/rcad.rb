@@ -271,8 +271,20 @@ class Shape
     I.move(cx, cy, cz)
   end
 
-  def align(other, mine)
-    self.transform(other * mine.inverse)
+  def align(a, b=nil)
+    if b == nil
+      a, b = I, a
+    end
+
+    if a.is_a? Symbol
+      a = self.send(a)
+    elsif a.is_a? Array
+      a = a.map { |s| self.send(s) }.reduce :*
+    end
+
+    a = (yield self) * a if block_given?
+
+    self.transform(b * a.inverse)
   end
 end
 
