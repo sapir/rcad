@@ -38,6 +38,57 @@ def to_polar(r, a)
 end
 
 
+class Transform
+  def move_x(delta)
+    move(delta, 0, 0)
+  end
+
+  def move_y(delta)
+    move(0, delta, 0)
+  end
+
+  def move_z(delta)
+    move(0, 0, delta)
+  end
+
+  def rot_x(angle)
+    rotate(angle, [1, 0, 0])
+  end
+
+  def rot_y(angle)
+    rotate(angle, [0, 1, 0])
+  end
+
+  def rot_z(angle)
+    rotate(angle, [0, 0, 1])
+  end
+
+  def scale_x(factor)
+    scale(factor, 1, 1)
+  end
+
+  def scale_y(factor)
+    scale(1, factor, 1)
+  end
+
+  def scale_z(factor)
+    scale(1, 1, factor)
+  end
+
+  def mirror_x
+    mirror(1, 0, 0)
+  end
+
+  def mirror_y
+    mirror(0, 1, 0)
+  end
+
+  def mirror_z
+    mirror(0, 0, 1)
+  end
+end
+
+
 class Shape
   # if @shape isn't defined in a Shape's initialize() method, then render()
   # should be overridden to create and return it on-the-fly.
