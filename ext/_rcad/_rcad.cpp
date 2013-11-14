@@ -208,6 +208,13 @@ static gp_GTrsf transform_mirror(gp_GTrsf self,
     return gtrsf;
 }
 
+static gp_GTrsf transform_inverse(gp_GTrsf self)
+{
+    gp_GTrsf gtrsf = self;
+    gtrsf.Invert();
+    return gtrsf;
+}
+
 
 static Data_Object<TopoDS_Shape> render_shape(Object shape)
 {
@@ -862,7 +869,8 @@ void Init__rcad()
         .define_method("move", &transform_move)
         .define_method("rotate", &transform_rotate)
         .define_method("scale", &transform_scale)
-        .define_method("mirror", &transform_mirror);
+        .define_method("mirror", &transform_mirror)
+        .define_method("inverse", &transform_inverse);
 
     rb_const_set(rb_cObject, Identifier("I"), to_ruby<gp_GTrsf>(gp_GTrsf()));
 
