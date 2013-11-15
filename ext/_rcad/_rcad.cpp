@@ -303,11 +303,11 @@ static Data_Object<TopoDS_Shape> render_shape(Object shape)
     return shape;
 }
 
+// TODO: better to just put things in a Data_Object to begin with, than to
+// allocate them twice
 static Object wrap_rendered_shape(const TopoDS_Shape &shape)
 {
-    Object shape_obj = rb_cShape.call("new");
-    shape_obj.iv_set("@shape", to_ruby(shape));
-    return shape_obj;
+    return Data_Object<TopoDS_Shape>(new TopoDS_Shape(shape));
 }
 
 void shape_write_stl(Object self, String path)
