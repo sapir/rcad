@@ -148,6 +148,16 @@ Object to_ruby<gp_Mat>(const gp_Mat &mat)
     return mat_ary;
 }
 
+template<>
+Object to_ruby<gp_XYZ>(const gp_XYZ &xyz)
+{
+    Array ary;
+    ary.push(xyz.X());
+    ary.push(xyz.Y());
+    ary.push(xyz.Z());
+    return ary;
+}
+
 
 static Standard_Real get_tolerance()
 {
