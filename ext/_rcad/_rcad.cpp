@@ -194,9 +194,19 @@ static gp_Mat transform_mat_part(gp_GTrsf self)
     return self.VectorialPart();
 }
 
+static void transform_mat_part_set(gp_GTrsf &self, gp_Mat mat)
+{
+    self.SetVectorialPart(mat);
+}
+
 static gp_XYZ transform_ofs_part(gp_GTrsf self)
 {
     return self.TranslationPart();
+}
+
+static void transform_ofs_part_set(gp_GTrsf &self, gp_XYZ ofs)
+{
+    self.SetTranslationPart(ofs);
 }
 
 static gp_GTrsf transform_multiply(gp_GTrsf self, gp_GTrsf right)
@@ -876,7 +886,9 @@ void Init__rcad()
         .add_handler<Standard_Failure>(translate_oce_exception)
         .define_method("to_s", &transform_to_s)
         .define_method("mat_part", &transform_mat_part)
+        .define_method("mat_part=", &transform_mat_part_set)
         .define_method("ofs_part", &transform_ofs_part)
+        .define_method("ofs_part=", &transform_ofs_part_set)
         .define_method("*", &transform_multiply)
         .define_method("move", &transform_move)
         .define_method("rotate", &transform_rotate)
