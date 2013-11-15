@@ -257,56 +257,6 @@ static Object wrap_rendered_shape(const TopoDS_Shape &shape)
     return shape_obj;
 }
 
-static Object shape_transform(Object self, const gp_Trsf &transform)
-{
-    Data_Object<TopoDS_Shape> rendered = render_shape(self);
-    return wrap_rendered_shape(
-        BRepBuilderAPI_Transform(*rendered, transform, Standard_True).Shape());
-}
-
-Object shape_transform_g(Object self, const gp_GTrsf &gtrsf)
-{
-    Data_Object<TopoDS_Shape> rendered = render_shape(self);
-    return wrap_rendered_shape(
-        BRepBuilderAPI_GTransform(*rendered, gtrsf, Standard_True).Shape());
-}
-
-Object shape_move(Object self, Standard_Real x, Standard_Real y,
-    Standard_Real z)
-{
-    gp_Trsf transform;
-    transform.SetTranslation(gp_Vec(x, y, z));
-    return shape_transform(self, transform);
-}
-
-Object shape_rotate(Object self, Standard_Real angle, gp_Dir axis)
-{
-    gp_Trsf transform;
-    transform.SetRotation(gp_Ax1(gp_Pnt(), axis), angle);
-    return shape_transform(self, transform);
-}
-
-Object shape_scale(Object self, Standard_Real x, Standard_Real y,
-    Standard_Real z)
-{
-    gp_GTrsf transform;
-    transform.SetVectorialPart(
-        gp_Mat(x, 0, 0,
-               0, y, 0,
-               0, 0, z));
-    return shape_transform_g(self, transform);
-}
-
-Object shape_mirror(Object self, Standard_Real x, Standard_Real y,
-    Standard_Real z)
-{
-    gp_Ax2 mirror_plane(gp::Origin(), gp_Dir(x, y, z));
-
-    gp_Trsf transform;
-    transform.SetMirror(mirror_plane);
-    return shape_transform(self, transform);
-}
-
 void shape_write_stl(Object self, String path)
 {
     Data_Object<TopoDS_Shape> shape = render_shape(self);
@@ -900,11 +850,6 @@ void Init__rcad()
 
     rb_cShape = define_class("Shape")
         .add_handler<Standard_Failure>(translate_oce_exception)
-        .define_method("transform", &shape_transform_g)
-        .define_method("move", &shape_move)
-        .define_method("rotate", &shape_rotate)
-        .define_method("scale", &shape_scale)
-        .define_method("mirror", &shape_mirror)
         .define_method("write_stl", &shape_write_stl)
         .define_method("_bbox", &shape__bbox)
         .define_singleton_method("from_stl", &shape_from_stl);
