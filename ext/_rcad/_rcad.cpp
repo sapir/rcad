@@ -131,6 +131,23 @@ gp_Dir from_ruby<gp_Dir>(Object obj)
     return gp_Dir(from_ruby<gp_Vec>(obj));
 }
 
+template<>
+Object to_ruby<gp_Mat>(const gp_Mat &mat)
+{
+    Array mat_ary;
+
+    for (int i = 1; i <= 3; ++i) {
+        Array row_ary;
+        for (int j = 1; j <= 3; ++j) {
+            row_ary.push(mat(i, j));
+        }
+
+        mat_ary.push(row_ary);
+    }
+
+    return mat_ary;
+}
+
 
 static Standard_Real get_tolerance()
 {
