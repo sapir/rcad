@@ -358,6 +358,10 @@ class TransformedShape < Shape
     @trsf = trsf
   end
 
+  def transform(trsf)
+    TransformedShape.new(@shape, trsf * @trsf)
+  end
+
   def move(x, y, z)
     TransformedShape.new(@shape, @trsf.move(x, y, z))
   end
