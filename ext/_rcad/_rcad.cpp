@@ -357,10 +357,10 @@ Object shape_from_stl(String path)
 
 Object transformed_shape_render(Object self)
 {
-    gp_GTrsf transform = from_ruby<gp_GTrsf>(self.iv_get("@transform"));
+    gp_GTrsf transform = from_ruby<gp_GTrsf>(self.iv_get("@trsf"));
 
     Object shape = self.iv_get("@shape");
-    Data_Object<TopoDS_Shape> rendered = render_shape(self);
+    Data_Object<TopoDS_Shape> rendered = render_shape(shape);
 
     return wrap_rendered_shape(
         BRepBuilderAPI_GTransform(*rendered, transform, Standard_True).Shape());
