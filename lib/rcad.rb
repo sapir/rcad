@@ -271,20 +271,24 @@ class Shape
     I.move(cx, cy, cz)
   end
 
-  def align(a, b=nil)
-    if b == nil
-      a, b = I, a
+  def _get_align_pt(align_pt)
+    (align_pt.is_a? Transform) ? align_pt : self.send(align_pt)
+  end
+
+  def align(*align_pts)
+    at = align_pts.pop
+
+    if align_pts.empty?
+      return self.transform(at)
     end
 
-    if a.is_a? Symbol
-      a = self.send(a)
-    elsif a.is_a? Array
-      a = a.map { |s| self.send(s) }.reduce :*
-    end
+    combined = align_pts
+      .map { |apt| _get_align_pt(apt) }
+      .reduce :*
 
-    a = (yield self) * a if block_given?
+    combined = (yield self) * combined if block_given?
 
-    self.transform(b * a.inverse)
+    self.transform(at * combined.inverse)
   end
 end
 
