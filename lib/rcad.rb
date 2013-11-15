@@ -351,27 +351,27 @@ end
 
 
 class TransformedShape < Shape
-  attr_reader :shape, :transform
+  attr_reader :shape, :trsf
 
-  def initialize(shape, transform)
+  def initialize(shape, trsf)
     @shape = shape
-    @transform = transform
+    @trsf = trsf
   end
 
   def move(x, y, z)
-    TransformedShape.new(@shape, @transform.move(x, y, z))
+    TransformedShape.new(@shape, @trsf.move(x, y, z))
   end
 
   def rotate(angle, axis)
-    TransformedShape.new(@shape, @transform.rotate(angle, axis))
+    TransformedShape.new(@shape, @trsf.rotate(angle, axis))
   end
 
   def scale(x, y, z)
-    TransformedShape.new(@shape, @transform.scale(x, y, z))
+    TransformedShape.new(@shape, @trsf.scale(x, y, z))
   end
 
   def mirror(x, y, z)
-    TransformedShape.new(@shape, @transform.mirror(x, y, z))
+    TransformedShape.new(@shape, @trsf.mirror(x, y, z))
   end
 end
 
