@@ -378,6 +378,10 @@ class TransformedShape < Shape
     @trsf = trsf
   end
 
+  def to_s
+    sprintf("%s*%s", @trsf, @shape)
+  end
+
   def transform(trsf)
     TransformedShape.new(@shape, trsf * @trsf)
   end
