@@ -352,6 +352,17 @@ Object shape_from_stl(String path)
 }
 
 
+Object transformed_shape_render(Object self)
+{
+    gp_GTrsf transform = from_ruby<gp_GTrsf>(self.iv_get("@transform"));
+
+    Object shape = self.iv_get("@shape");
+    Data_Object<TopoDS_Shape> rendered = render_shape(self);
+
+    return wrap_rendered_shape(
+        BRepBuilderAPI_GTransform(*rendered, transform, Standard_True).Shape());
+}
+
 static TopoDS_Wire make_wire_from_path(Array points, Array path)
 {
     BRepBuilderAPI_MakeWire wire_maker;
@@ -897,6 +908,10 @@ void Init__rcad()
         .define_method("write_stl", &shape_write_stl)
         .define_method("_bbox", &shape__bbox)
         .define_singleton_method("from_stl", &shape_from_stl);
+
+    Class rb_cTransformedShape = define_class("TransformedShape")
+        .add_handler<Standard_Failure>(translate_oce_exception)
+        .define_method("render", &transformed_shape_render);
 
     Class rb_cPolygon = define_class("Polygon", rb_cShape)
         .add_handler<Standard_Failure>(translate_oce_exception)

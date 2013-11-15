@@ -350,6 +350,16 @@ at_exit do
 end
 
 
+class TransformedShape < Shape
+  attr_reader :shape, :transform
+
+  def initialize(shape, transform)
+    @shape = shape
+    @transform = transform
+  end
+end
+
+
 class Polygon
   attr_reader :points, :paths
 
