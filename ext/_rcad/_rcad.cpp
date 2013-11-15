@@ -189,6 +189,16 @@ static String transform_to_s(gp_GTrsf self)
     return s.str();
 }
 
+static gp_Mat transform_mat_part(gp_GTrsf self)
+{
+    return self.VectorialPart();
+}
+
+static gp_XYZ transform_ofs_part(gp_GTrsf self)
+{
+    return self.TranslationPart();
+}
+
 static gp_GTrsf transform_multiply(gp_GTrsf self, gp_GTrsf right)
 {
     gp_GTrsf gtrsf = self;
@@ -865,6 +875,8 @@ void Init__rcad()
     Class rb_cTransform = define_class<gp_GTrsf>("Transform")
         .add_handler<Standard_Failure>(translate_oce_exception)
         .define_method("to_s", &transform_to_s)
+        .define_method("mat_part", &transform_mat_part)
+        .define_method("ofs_part", &transform_ofs_part)
         .define_method("*", &transform_multiply)
         .define_method("move", &transform_move)
         .define_method("rotate", &transform_rotate)
