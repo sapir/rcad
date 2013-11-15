@@ -357,6 +357,22 @@ class TransformedShape < Shape
     @shape = shape
     @transform = transform
   end
+
+  def move(x, y, z)
+    TransformedShape.new(@shape, @transform.move(x, y, z))
+  end
+
+  def rotate(angle, axis)
+    TransformedShape.new(@shape, @transform.rotate(angle, axis))
+  end
+
+  def scale(x, y, z)
+    TransformedShape.new(@shape, @transform.scale(x, y, z))
+  end
+
+  def mirror(x, y, z)
+    TransformedShape.new(@shape, @transform.mirror(x, y, z))
+  end
 end
 
 
