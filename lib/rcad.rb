@@ -404,7 +404,7 @@ class TransformedShape < Shape
 end
 
 
-class Polygon
+class Polygon < Shape
   attr_reader :points, :paths
 
   def initialize(points, paths=nil)
