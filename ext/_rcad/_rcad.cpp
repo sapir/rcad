@@ -905,7 +905,7 @@ void Init__rcad()
         .define_method("_bbox", &shape__bbox)
         .define_singleton_method("from_stl", &shape_from_stl);
 
-    Class rb_cTransformedShape = define_class("TransformedShape")
+    Class rb_cTransformedShape = define_class("TransformedShape", rb_cShape)
         .add_handler<Standard_Failure>(translate_oce_exception)
         .define_method("render", &transformed_shape_render);
 
