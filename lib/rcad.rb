@@ -191,7 +191,7 @@ class Shape
     LinearExtrusion.new(self, height, twist)
   end
 
-  def revolve(angle=360.deg_to_rad)
+  def revolve(angle=nil)
     Revolution.new(self, angle)
   end
 
