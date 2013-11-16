@@ -701,7 +701,7 @@ Object revolution_render(Object self)
 
     Object angle = self.iv_get("@angle");
 
-    gp_Circ circ(gp::ZOX(), 1.0);
+    gp_Circ circ(gp_Ax2(gp::Origin(), -gp::DY(), gp::DX()), 1.0);
     TopoDS_Edge edge;
 
     if (angle.is_nil()) {
