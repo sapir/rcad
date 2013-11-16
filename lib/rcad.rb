@@ -291,10 +291,6 @@ class Shape
     I.move(cx, cy, cz)
   end
 
-  def _get_align_pt(align_pt)
-    (align_pt.is_a? Transform) ? align_pt : self.send(align_pt)
-  end
-
   def align(*align_pts)
     at = align_pts.pop
 
@@ -303,7 +299,7 @@ class Shape
     end
 
     combined = align_pts
-      .map { |apt| _get_align_pt(apt) }
+      .map { |apt| (apt.is_a? Transform) ? apt : self.send(apt) }
       .reduce :*
 
     combined = (yield self) * combined if block_given?
