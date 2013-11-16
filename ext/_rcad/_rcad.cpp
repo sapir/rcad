@@ -708,7 +708,9 @@ Object revolution_render(Object self)
     if (angle.is_nil()) {
         edge = BRepBuilderAPI_MakeEdge(circ);
     } else {
-        const Standard_Real angle_num = from_ruby<Standard_Real>(angle);
+        Standard_Real angle_num = from_ruby<Standard_Real>(angle);
+        angle_num = std::max(angle_num, 0.0);
+        angle_num = std::min(angle_num, M_PI * 2);
 
         Handle_Geom_Curve curve_hnd(new Geom_Circle(circ));
         edge = BRepBuilderAPI_MakeEdge(curve_hnd, 0, angle_num);
