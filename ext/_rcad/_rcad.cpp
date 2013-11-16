@@ -6,6 +6,7 @@
 #include <TColgp_Array2OfPnt.hxx>
 #include <Poly_Triangulation.hxx>
 #include <Geom_BezierSurface.hxx>
+#include <Geom_Circle.hxx>
 #include <GCE2d_MakeSegment.hxx>
 #include <TopoDS.hxx>
 #include <BRepPrimAPI_MakeBox.hxx>
@@ -700,18 +701,22 @@ Object revolution_render(Object self)
     Data_Object<TopoDS_Shape> shape = render_shape(profile);
 
     Object angle = self.iv_get("@angle");
+
+    gp_Circ circ(gp::ZOX(), 1.0);
+    TopoDS_Edge edge;
+
     if (angle.is_nil()) {
-        gp_Circ circ(gp::ZOX(), 1.0);
-        TopoDS_Edge edge = BRepBuilderAPI_MakeEdge(circ);
-        TopoDS_Wire wire = BRepBuilderAPI_MakeWire(edge);
-        return wrap_rendered_shape(
-            extrude_shape(*shape, wire, TopoDS_Face()));
+        edge = BRepBuilderAPI_MakeEdge(circ);
     } else {
-        Standard_Real angle_num = from_ruby<Standard_Real>(angle);
-        return to_ruby(
-            BRepPrimAPI_MakeRevol(*shape, gp::OY(), angle_num,
-                Standard_True).Shape());
+        const Standard_Real angle_num = from_ruby<Standard_Real>(angle);
+
+        Handle_Geom_Curve curve_hnd(new Geom_Circle(circ));
+        edge = BRepBuilderAPI_MakeEdge(curve_hnd, 0, angle_num);
     }
+
+    TopoDS_Wire spine = BRepBuilderAPI_MakeWire(edge);
+    return wrap_rendered_shape(
+        extrude_shape(*shape, spine, TopoDS_Face()));
 }
 
 
