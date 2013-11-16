@@ -566,6 +566,30 @@ static bool is_inner_wire_of_face(TopoDS_Wire wire, TopoDS_Face face)
     return (fclass2D.PerformInfinitePoint() != TopAbs_OUT);
 }
 
+static TopoDS_Shape extrude_wire(TopoDS_Wire profile, TopoDS_Wire spine,
+    TopoDS_Face spine_support)
+{
+    BRepOffsetAPI_MakePipeShell pipe_maker(spine);
+
+    if (!spine_support.IsNull()) {
+        if (!pipe_maker.SetMode(spine_support)) {
+            throw Exception(rb_cOCEError,
+                "failed setting twisted surface-normal for PipeShell");
+        }
+    }
+
+    pipe_maker.Add(profile);
+    const Standard_Real tolerance = get_tolerance();
+    pipe_maker.SetTolerance(tolerance, tolerance);
+    pipe_maker.Build();
+
+    if (!pipe_maker.MakeSolid()) {
+        throw Exception(rb_cOCEError, "failed making extrusion solid");
+    }
+
+    return pipe_maker.Shape();
+}
+
 static TopoDS_Shape twist_extrude_wire(TopoDS_Wire wire, Standard_Real height,
     Standard_Real twist)
 {
@@ -600,24 +624,7 @@ static TopoDS_Shape twist_extrude_wire(TopoDS_Wire wire, Standard_Real height,
     TopoDS_Edge spine = BRepBuilderAPI_MakeEdge(uv_curve_hnd, surf_hnd);
     TopoDS_Wire spine_wire = BRepBuilderAPI_MakeWire(spine);
 
-
-    BRepOffsetAPI_MakePipeShell pipe_maker(spine_wire);
-
-    if (!pipe_maker.SetMode(spine_support)) {
-        throw Exception(rb_cOCEError,
-            "failed setting twisted surface-normal for PipeShell");
-    }
-
-    pipe_maker.Add(wire);
-    const Standard_Real tolerance = get_tolerance();
-    pipe_maker.SetTolerance(tolerance, tolerance);
-    pipe_maker.Build();
-
-    if (!pipe_maker.MakeSolid()) {
-        throw Exception(rb_cOCEError, "failed making extrusion solid");
-    }
-
-    return pipe_maker.Shape();
+    return extrude_wire(wire, spine_wire, spine_support);
 }
 
 static TopoDS_Shape twist_extrude_face(TopoDS_Face face, Standard_Real height,
