@@ -694,7 +694,6 @@ Object linear_extrusion_render(Object self)
 }
 
 
-// initialize is defined in Ruby code
 Object revolution_render(Object self)
 {
     Object profile = self.iv_get("@profile");
