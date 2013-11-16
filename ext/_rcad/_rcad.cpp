@@ -765,13 +765,13 @@ static std::vector<gp_Pnt> get_points_from_shapes(Array shapes)
 }
 
 
-// Sort function object to sort polygon vertices
+// Sort function object to sort the vertices of a convex polygon
 // Algorithm from here:
 // http://stackoverflow.com/a/15104911/2758814
-class PolygonVertexSortComparator
+class ConvexPolygonVertexSortComparator
 {
 public:
-    PolygonVertexSortComparator(std::vector<gp_Pnt> vertices)
+    ConvexPolygonVertexSortComparator(std::vector<gp_Pnt> vertices)
         : vertices(vertices)
     {
         if (vertices.size() == 0) {
@@ -844,7 +844,7 @@ static TopoDS_Solid make_solid_from_qhull()
         }
 
         sort(vertices.begin(), vertices.end(),
-            PolygonVertexSortComparator(vertices));
+            ConvexPolygonVertexSortComparator(vertices));
 
         BRepBuilderAPI_MakePolygon poly_maker;
         for (size_t i = 0; i < vertices.size(); ++i) {
