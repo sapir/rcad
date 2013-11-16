@@ -701,8 +701,11 @@ Object revolution_render(Object self)
 
     Object angle = self.iv_get("@angle");
     if (angle.is_nil()) {
-        return to_ruby(
-            BRepPrimAPI_MakeRevol(*shape, gp::OY(), Standard_True).Shape());
+        gp_Circ circ(gp::ZOX(), 1.0);
+        TopoDS_Edge edge = BRepBuilderAPI_MakeEdge(circ);
+        TopoDS_Wire wire = BRepBuilderAPI_MakeWire(edge);
+        return wrap_rendered_shape(
+            extrude_shape(*shape, wire, TopoDS_Face()));
     } else {
         Standard_Real angle_num = from_ruby<Standard_Real>(angle);
         return to_ruby(
