@@ -590,7 +590,54 @@ static TopoDS_Shape extrude_wire(TopoDS_Wire profile, TopoDS_Wire spine,
     return pipe_maker.Shape();
 }
 
-static TopoDS_Shape twist_extrude_wire(TopoDS_Wire wire, Standard_Real height,
+static TopoDS_Shape extrude_face(TopoDS_Face profile, TopoDS_Wire spine,
+    TopoDS_Face spine_support)
+{
+    // extrude outer and inner wires separately, then subtract the inner
+    // shapes from the outer shape. there should be only one outer shape,
+    // and zero or more inner shapes.
+
+    TopoDS_Shape outer;
+
+    TopoDS_Compound inner;
+    BRep_Builder builder;
+    builder.MakeCompound(inner);
+
+    TopExp_Explorer texp;
+
+    TopoDS_Face orface = TopoDS::Face(profile.Oriented(TopAbs_FORWARD));
+    for (texp.Init(orface, TopAbs_WIRE); texp.More(); texp.Next()) {
+        TopoDS_Wire wire = TopoDS::Wire(texp.Current());
+        TopoDS_Shape ext_wire = extrude_wire(wire, spine, spine_support);
+
+        if (is_inner_wire_of_face(wire, orface)) {
+            builder.Add(inner, ext_wire);
+        } else {
+            outer = ext_wire;
+        }
+    }
+
+    return BRepAlgoAPI_Cut(outer, inner).Shape();
+}
+
+static TopoDS_Shape extrude_shape(TopoDS_Shape profile, TopoDS_Wire spine,
+    TopoDS_Face spine_support)
+{
+    BRep_Builder builder;
+    TopoDS_Compound compound;
+    builder.MakeCompound(compound);
+
+    TopExp_Explorer texp;
+    for (texp.Init(profile, TopAbs_FACE); texp.More(); texp.Next()) {
+        builder.Add(compound,
+            extrude_face(
+                TopoDS::Face(texp.Current()), spine, spine_support));
+    }
+
+    return compound;
+}
+
+static TopoDS_Shape twist_extrude(TopoDS_Shape shape, Standard_Real height,
     Standard_Real twist)
 {
     // split height into segments. each segment will twist no more than
@@ -624,37 +671,7 @@ static TopoDS_Shape twist_extrude_wire(TopoDS_Wire wire, Standard_Real height,
     TopoDS_Edge spine = BRepBuilderAPI_MakeEdge(uv_curve_hnd, surf_hnd);
     TopoDS_Wire spine_wire = BRepBuilderAPI_MakeWire(spine);
 
-    return extrude_wire(wire, spine_wire, spine_support);
-}
-
-static TopoDS_Shape twist_extrude_face(TopoDS_Face face, Standard_Real height,
-    Standard_Real twist)
-{
-    // extrude outer and inner wires separately, then subtract the inner
-    // shapes from the outer shape. there should be only one outer shape,
-    // and zero or more inner shapes.
-
-    TopoDS_Shape outer;
-
-    TopoDS_Compound inner;
-    BRep_Builder builder;
-    builder.MakeCompound(inner);
-
-    TopExp_Explorer texp;
-
-    TopoDS_Face orface = TopoDS::Face(face.Oriented(TopAbs_FORWARD));
-    for (texp.Init(orface, TopAbs_WIRE); texp.More(); texp.Next()) {
-        TopoDS_Wire wire = TopoDS::Wire(texp.Current());
-        TopoDS_Shape ext_wire = twist_extrude_wire(wire, height, twist);
-
-        if (is_inner_wire_of_face(wire, orface)) {
-            builder.Add(inner, ext_wire);
-        } else {
-            outer = ext_wire;
-        }
-    }
-
-    return BRepAlgoAPI_Cut(outer, inner).Shape();
+    return extrude_shape(shape, spine_wire, spine_support);
 }
 
 // initialize is defined in Ruby code
@@ -671,18 +688,7 @@ Object linear_extrusion_render(Object self)
             BRepPrimAPI_MakePrism(*shape, gp_Vec(0, 0, height),
                 Standard_True).Shape());
     } else {
-        BRep_Builder builder;
-        TopoDS_Compound compound;
-        builder.MakeCompound(compound);
-
-        TopExp_Explorer texp;
-        for (texp.Init(*shape, TopAbs_FACE); texp.More(); texp.Next()) {
-            builder.Add(compound,
-                twist_extrude_face(
-                    TopoDS::Face(texp.Current()), height, twist));
-        }
-
-        return wrap_rendered_shape(compound);
+        return wrap_rendered_shape(twist_extrude(*shape, height, twist));
     }
 }
 
