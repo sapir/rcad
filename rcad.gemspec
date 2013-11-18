@@ -11,7 +11,7 @@ Gem::Specification.new do |spec|
   spec.description   = %q{Solid CAD programming library}
   spec.summary       = %q{Ruby CAD library}
   spec.homepage      = "http://github.com/sapir/rcad"
-# TODO: choose a license:  spec.license       = "MIT"
+  spec.license       = "LGPLv2.1 or later"
 
   spec.files         = `git ls-files`.split($/)
   spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
