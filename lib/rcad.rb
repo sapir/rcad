@@ -447,8 +447,9 @@ end
 class Circle < Shape
   attr_accessor :dia
 
-  def initialize(dia)
-    @dia = dia
+  def initialize(*args)
+    opts = args.pop if args[-1].is_a? Hash
+    @dia = args.shift || opts[:d] || opts.fetch(:r) * 2
   end
 end
 
