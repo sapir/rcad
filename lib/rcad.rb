@@ -196,11 +196,7 @@ class Shape
   end
 
   def bbox
-    if @bbox == nil
-      @bbox = _bbox
-    end
-
-    @bbox
+    @bbox ||= _bbox
   end
 
   def minx
