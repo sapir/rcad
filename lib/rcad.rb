@@ -515,9 +515,9 @@ class Cone < Shape
   attr_accessor :height, :bottom_dia, :top_dia
 
   def initialize(*args)
-    # TODO: default top_dia to 0
     # TODO: maybe make positional order be (:d0, [:dh], :h)
-    @height, @bottom_dia, @top_dia = magic_shape_params(args, :h, :d0, :dh)
+    @height, @bottom_dia, @top_dia = magic_shape_params(
+      args, :h, :d0, :dh, dh: 0)
   end
 
   def bottom_radius
