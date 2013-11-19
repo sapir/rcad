@@ -396,6 +396,33 @@ class TransformedShape < Shape
 end
 
 
+def magic_shape_params(args, *expected)
+    opts = (args[-1].is_a? Hash) ? args.pop : {}
+
+    expected.map do |name|
+      name_s = name.to_s
+
+      if not args.empty?
+        args.shift
+
+      elsif opts.key?(name)
+        opts[name]
+
+      elsif name_s.start_with?("d")
+        rname = ("r" + name_s[1..-1]).to_sym
+
+        fail ArgumentError, "please specify either #{name} or #{rname}" \
+          unless opts.key?(rname)
+
+        opts[rname] * 2
+
+      else
+        fail ArgumentError, "please specify #{name}"
+      end
+    end
+end
+
+
 class Polygon < Shape
   attr_reader :points, :paths
 
@@ -448,8 +475,7 @@ class Circle < Shape
   attr_accessor :dia
 
   def initialize(*args)
-    opts = args.pop if args[-1].is_a? Hash
-    @dia = args.shift || opts[:d] || opts.fetch(:r) * 2
+    @dia, = magic_shape_params(args, :d)
   end
 end
 
@@ -481,11 +507,8 @@ class Cone < Shape
   attr_accessor :height, :bottom_dia, :top_dia
 
   def initialize(*args)
-    opts = args.pop if args[-1].is_a? Hash
-    @height = args.shift || opts.fetch(:h)
-    @bottom_dia = args.shift || opts[:d0] || opts.fetch(:r0) * 2
     # TODO: default top_dia to 0
-    @top_dia = args.shift || opts[:dh] || opts.fetch(:rh) * 2
+    @height, @bottom_dia, @top_dia = magic_shape_params(args, :h, :d0, :dh)
   end
 
   def bottom_radius
