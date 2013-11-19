@@ -398,9 +398,19 @@ end
 
 def magic_shape_params(args, *expected)
     opts = (args[-1].is_a? Hash) ? args.pop : {}
+    defaults = (expected[-1].is_a? Hash) ? expected.pop : {}
 
     expected.map do |name|
       name_s = name.to_s
+      is_dia = name_s.start_with?("d")
+
+      if is_dia
+        rname = ("r" + name_s[1..-1]).to_sym
+        fail_msg = "please specify either #{name} or #{rname}"
+      else
+        fail_msg = "please specify #{name}"
+      end
+
 
       if not args.empty?
         args.shift
@@ -408,16 +418,14 @@ def magic_shape_params(args, *expected)
       elsif opts.key?(name)
         opts[name]
 
-      elsif name_s.start_with?("d")
-        rname = ("r" + name_s[1..-1]).to_sym
-
-        fail ArgumentError, "please specify either #{name} or #{rname}" \
-          unless opts.key?(rname)
-
+      elsif is_dia and opts.key?(rname)
         opts[rname] * 2
 
+      elsif defaults.key?(name)
+        defaults[name]
+
       else
-        fail ArgumentError, "please specify #{name}"
+        fail ArgumentError, fail_msg
       end
     end
 end
