@@ -538,8 +538,8 @@ end
 class Sphere < Shape
   attr_accessor :dia
 
-  def initialize(dia)
-    @dia = dia
+  def initialize(*args)
+    @dia, = magic_shape_params(args, :d)
   end
 
   def radius
