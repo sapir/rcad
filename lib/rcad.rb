@@ -480,10 +480,12 @@ end
 class Cone < Shape
   attr_accessor :height, :bottom_dia, :top_dia
 
-  def initialize(height, bottom_dia, top_dia=0)
-    @height = height
-    @bottom_dia = bottom_dia
-    @top_dia = top_dia
+  def initialize(*args)
+    opts = args.pop if args[-1].is_a? Hash
+    @height = args.shift || opts.fetch(:h)
+    @bottom_dia = args.shift || opts[:d0] || opts.fetch(:r0) * 2
+    # TODO: default top_dia to 0
+    @top_dia = args.shift || opts[:dh] || opts.fetch(:rh) * 2
   end
 
   def bottom_radius
