@@ -444,9 +444,8 @@ end
 class RegularPolygon < Polygon
   attr_reader :sides, :radius
 
-  def initialize(sides, radius)
-    @sides = sides
-    @radius = radius
+  def initialize(*args)
+    @sides, @radius = magic_shape_params(:sides, :r)
 
     angles = (1..sides).map { |i| i * 2 * Math::PI / sides }
     points = angles.map { |a| to_polar(radius, a) }
