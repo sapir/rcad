@@ -34,7 +34,7 @@ $tol = 50.um
 
 
 def to_polar(r, a)
-  return [r * Math::cos(a), r * Math::sin(a)]
+  return [r * Math.cos(a), r * Math.sin(a)]
 end
 
 
