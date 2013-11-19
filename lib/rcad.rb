@@ -526,7 +526,7 @@ class Cylinder < Shape
   attr_accessor :height, :dia
 
   def initialize(*args)
-    @height, @dia = magic_shape_params(args, :h, :d)
+    @dia, @height = magic_shape_params(args, :d, :h)
   end
 
   def radius
