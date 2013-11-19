@@ -569,10 +569,9 @@ end
 class Torus < Shape
   attr_accessor :inner_dia, :outer_dia, :angle
 
-  def initialize(inner_dia, outer_dia, angle=nil)
-    @inner_dia = inner_dia
-    @outer_dia = outer_dia
-    @angle = angle
+  def initialize(*args)
+    @inner_dia, @outer_dia, @angle = magic_shape_params(
+      :id, :od, :angle, angle: nil)
   end
 
   def inner_radius
