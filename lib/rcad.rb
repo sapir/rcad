@@ -48,7 +48,12 @@ class Transform
   end
 
   def scale(*args)
-    _scale(*Transform.magic_transform_params(args, 1))
+    if args.size == 1 and args[0].is_a? Numeric
+      factor = args[0]
+      _scale(factor, factor, factor)
+    else
+      _scale(*Transform.magic_transform_params(args, 1))
+    end
   end
 
   def mirror(x, y, z)
