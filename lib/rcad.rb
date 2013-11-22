@@ -60,6 +60,8 @@ class Transform
     _mirror(x, y, z)
   end
 
+  # TODO: consider removing move_foo and scale_foo methods
+
   def move_x(delta)
     move(delta, 0, 0)
   end
