@@ -484,7 +484,7 @@ class RegularPolygon < Polygon
   attr_reader :sides, :radius
 
   def initialize(*args)
-    @sides, @radius = magic_shape_params(:sides, :r)
+    @sides, @radius = magic_shape_params(args, :sides, :r)
 
     angles = (1..sides).map { |i| i * 2 * Math::PI / sides }
     points = angles.map { |a| to_polar(radius, a) }
@@ -609,7 +609,7 @@ class Torus < Shape
 
   def initialize(*args)
     @inner_dia, @outer_dia, @angle = magic_shape_params(
-      :id, :od, :angle, angle: nil)
+      args, :id, :od, :angle, angle: nil)
   end
 
   def inner_radius
