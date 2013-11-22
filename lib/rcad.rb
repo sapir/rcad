@@ -164,20 +164,20 @@ class Shape
     TransformedShape.new(self, trsf)
   end
 
-  def move(x, y, z)
-    TransformedShape.new(self, I.move(x, y, z))
+  def move(*args)
+    TransformedShape.new(self, I.move(*args))
   end
 
-  def rotate(angle, axis)
-    TransformedShape.new(self, I.rotate(angle, axis))
+  def rotate(*args)
+    TransformedShape.new(self, I.rotate(*args))
   end
 
-  def scale(x, y, z)
-    TransformedShape.new(self, I.scale(x, y, z))
+  def scale(*args)
+    TransformedShape.new(self, I.scale(*args))
   end
 
-  def mirror(x, y, z)
-    TransformedShape.new(self, I.mirror(x, y, z))
+  def mirror(*args)
+    TransformedShape.new(self, I.mirror(*args))
   end
 
   def move_x(delta)
