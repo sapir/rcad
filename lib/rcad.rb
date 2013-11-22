@@ -63,15 +63,15 @@ class Transform
   # TODO: consider removing move_foo and scale_foo methods
 
   def move_x(delta)
-    move(delta, 0, 0)
+    move(x: delta)
   end
 
   def move_y(delta)
-    move(0, delta, 0)
+    move(y: delta)
   end
 
   def move_z(delta)
-    move(0, 0, delta)
+    move(z: delta)
   end
 
   def rot_x(angle)
@@ -87,15 +87,15 @@ class Transform
   end
 
   def scale_x(factor)
-    scale(factor, 1, 1)
+    scale(x: factor)
   end
 
   def scale_y(factor)
-    scale(1, factor, 1)
+    scale(y: factor)
   end
 
   def scale_z(factor)
-    scale(1, 1, factor)
+    scale(z: factor)
   end
 
   def mirror_x
