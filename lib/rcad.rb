@@ -108,7 +108,8 @@ class Transform
   def self.magic_transform_params(args, default)
     if args.size == 1 and args[0].is_a? Array
       fail ArgumentError, "please pass coordinates separately, not in an array"
-    elsif args.size == 3 and args.all? { |n| n.is_a? Numeric }
+    elsif (args.size == 3 or args.size == 2) and args.all? { |n| n.is_a? Numeric }
+      args.push(default) if args.size < 3
       args
     elsif args.size == 1 and args[0].is_a? Hash
       opts, = args
