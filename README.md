@@ -7,7 +7,7 @@ Example:
 
 ```ruby
 require 'rcad'
-require 'gears'
+require 'rcad/gears'
 
 # overloaded ~ operator adds stuff to the shape
 # you're working on
