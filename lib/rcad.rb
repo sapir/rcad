@@ -43,16 +43,16 @@ class Transform
     _move(*Transform.magic_transform_params(args, 0))
   end
 
-  def rotate(*args)
-    _rotate(*args)
+  def rotate(angle, axis)
+    _rotate(angle, axis)
   end
 
   def scale(*args)
     _scale(*Transform.magic_transform_params(args, 1))
   end
 
-  def mirror(*args)
-    _mirror(*args)
+  def mirror(x, y, z)
+    _mirror(x, y, z)
   end
 
   def move_x(delta)
