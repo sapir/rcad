@@ -38,30 +38,7 @@ def to_polar(r, a)
 end
 
 
-class Transform
-  # TODO: low-level transform methods should be private
-
-  def move(*args)
-    _move(*Transform.magic_transform_params(args, 0))
-  end
-
-  def rotate(angle, axis)
-    _rotate(angle, axis)
-  end
-
-  def scale(*args)
-    if args.size == 1 and args[0].is_a? Numeric
-      factor = args[0]
-      _scale(factor, factor, factor)
-    else
-      _scale(*Transform.magic_transform_params(args, 1))
-    end
-  end
-
-  def mirror(x, y, z)
-    _mirror(x, y, z)
-  end
-
+module TransformableMixin
   # TODO: consider removing move_foo and scale_foo methods
 
   def move_x(delta)
@@ -111,6 +88,34 @@ class Transform
   def mirror_z
     mirror(0, 0, 1)
   end
+end
+
+
+class Transform
+  include TransformableMixin
+
+  # TODO: low-level transform methods should be private
+
+  def move(*args)
+    _move(*Transform.magic_transform_params(args, 0))
+  end
+
+  def rotate(angle, axis)
+    _rotate(angle, axis)
+  end
+
+  def scale(*args)
+    if args.size == 1 and args[0].is_a? Numeric
+      factor = args[0]
+      _scale(factor, factor, factor)
+    else
+      _scale(*Transform.magic_transform_params(args, 1))
+    end
+  end
+
+  def mirror(x, y, z)
+    _mirror(x, y, z)
+  end
 
   private
 
@@ -131,6 +136,8 @@ end
 
 
 class Shape
+  include TransformableMixin
+
   # if @shape isn't defined in a Shape's initialize() method, then render()
   # should be overridden to create and return it on-the-fly.
   def render
@@ -178,54 +185,6 @@ class Shape
 
   def mirror(*args)
     TransformedShape.new(self, I.mirror(*args))
-  end
-
-  def move_x(delta)
-    move(delta, 0, 0)
-  end
-
-  def move_y(delta)
-    move(0, delta, 0)
-  end
-
-  def move_z(delta)
-    move(0, 0, delta)
-  end
-
-  def rot_x(angle)
-    rotate(angle, [1, 0, 0])
-  end
-
-  def rot_y(angle)
-    rotate(angle, [0, 1, 0])
-  end
-
-  def rot_z(angle)
-    rotate(angle, [0, 0, 1])
-  end
-
-  def scale_x(factor)
-    scale(factor, 1, 1)
-  end
-
-  def scale_y(factor)
-    scale(1, factor, 1)
-  end
-
-  def scale_z(factor)
-    scale(1, 1, factor)
-  end
-
-  def mirror_x
-    mirror(1, 0, 0)
-  end
-
-  def mirror_y
-    mirror(0, 1, 0)
-  end
-
-  def mirror_z
-    mirror(0, 0, 1)
   end
 
   def extrude(height, twist=0)
