@@ -302,6 +302,42 @@ class Shape
 
     self.transform(at * combined.inverse)
   end
+
+  protected
+
+  def self.magic_shape_params(args, *expected)
+    opts = (args[-1].is_a? Hash) ? args.pop : {}
+    defaults = (expected[-1].is_a? Hash) ? expected.pop : {}
+
+    expected.map do |name|
+      name_s = name.to_s
+      is_dia = name_s.start_with?("d")
+
+      if is_dia
+        rname = ("r" + name_s[1..-1]).to_sym
+        fail_msg = "please specify either #{name} or #{rname}"
+      else
+        fail_msg = "please specify #{name}"
+      end
+
+
+      if not args.empty?
+        args.shift
+
+      elsif opts.key?(name)
+        opts[name]
+
+      elsif is_dia and opts.key?(rname)
+        opts[rname] * 2
+
+      elsif defaults.key?(name)
+        defaults[name]
+
+      else
+        fail ArgumentError, fail_msg
+      end
+    end
+  end
 end
 
 $shape_stack = []
@@ -396,41 +432,6 @@ class TransformedShape < Shape
 end
 
 
-def magic_shape_params(args, *expected)
-    opts = (args[-1].is_a? Hash) ? args.pop : {}
-    defaults = (expected[-1].is_a? Hash) ? expected.pop : {}
-
-    expected.map do |name|
-      name_s = name.to_s
-      is_dia = name_s.start_with?("d")
-
-      if is_dia
-        rname = ("r" + name_s[1..-1]).to_sym
-        fail_msg = "please specify either #{name} or #{rname}"
-      else
-        fail_msg = "please specify #{name}"
-      end
-
-
-      if not args.empty?
-        args.shift
-
-      elsif opts.key?(name)
-        opts[name]
-
-      elsif is_dia and opts.key?(rname)
-        opts[rname] * 2
-
-      elsif defaults.key?(name)
-        defaults[name]
-
-      else
-        fail ArgumentError, fail_msg
-      end
-    end
-end
-
-
 class Polygon < Shape
   attr_reader :points, :paths
 
@@ -445,7 +446,7 @@ class RegularPolygon < Polygon
   attr_reader :sides, :radius
 
   def initialize(*args)
-    @sides, @radius = magic_shape_params(args, :sides, :r)
+    @sides, @radius = Shape.magic_shape_params(args, :sides, :r)
 
     angles = (1..sides).map { |i| i * 2 * Math::PI / sides }
     points = angles.map { |a| to_polar(radius, a) }
@@ -482,7 +483,7 @@ class Circle < Shape
   attr_accessor :dia
 
   def initialize(*args)
-    @dia, = magic_shape_params(args, :d)
+    @dia, = Shape.magic_shape_params(args, :d)
   end
 end
 
@@ -515,7 +516,7 @@ class Cone < Shape
 
   def initialize(*args)
     # TODO: maybe make positional order be (:d0, [:dh], :h)
-    @height, @bottom_dia, @top_dia = magic_shape_params(
+    @height, @bottom_dia, @top_dia = Shape.magic_shape_params(
       args, :h, :d0, :dh, dh: 0)
   end
 
@@ -533,7 +534,7 @@ class Cylinder < Shape
   attr_accessor :height, :dia
 
   def initialize(*args)
-    @dia, @height = magic_shape_params(args, :d, :h)
+    @dia, @height = Shape.magic_shape_params(args, :d, :h)
   end
 
   def radius
@@ -546,7 +547,7 @@ class Sphere < Shape
   attr_accessor :dia
 
   def initialize(*args)
-    @dia, = magic_shape_params(args, :d)
+    @dia, = Shape.magic_shape_params(args, :d)
   end
 
   def radius
@@ -569,7 +570,7 @@ class Torus < Shape
   attr_accessor :inner_dia, :outer_dia, :angle
 
   def initialize(*args)
-    @inner_dia, @outer_dia, @angle = magic_shape_params(
+    @inner_dia, @outer_dia, @angle = Shape.magic_shape_params(
       args, :id, :od, :angle, angle: nil)
   end
 
@@ -608,7 +609,7 @@ class RegularPrism < LinearExtrusion
   attr_reader :sides, :radius
 
   def initialize(*args)
-    @sides, @radius, height = magic_shape_params(args,
+    @sides, @radius, height = Shape.magic_shape_params(args,
       :sides, :r, :h)
 
     poly = RegularPolygon.new(sides, radius)
