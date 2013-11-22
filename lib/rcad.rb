@@ -378,20 +378,20 @@ class TransformedShape < Shape
     TransformedShape.new(@shape, trsf * @trsf)
   end
 
-  def move(x, y, z)
-    TransformedShape.new(@shape, @trsf.move(x, y, z))
+  def move(*args)
+    TransformedShape.new(@shape, @trsf.move(*args))
   end
 
-  def rotate(angle, axis)
-    TransformedShape.new(@shape, @trsf.rotate(angle, axis))
+  def rotate(*args)
+    TransformedShape.new(@shape, @trsf.rotate(*args))
   end
 
-  def scale(x, y, z)
-    TransformedShape.new(@shape, @trsf.scale(x, y, z))
+  def scale(*args)
+    TransformedShape.new(@shape, @trsf.scale(*args))
   end
 
-  def mirror(x, y, z)
-    TransformedShape.new(@shape, @trsf.mirror(x, y, z))
+  def mirror(*args)
+    TransformedShape.new(@shape, @trsf.mirror(*args))
   end
 end
 
