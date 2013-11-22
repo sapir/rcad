@@ -117,19 +117,21 @@ class Transform
     _mirror(x, y, z)
   end
 
-  private
+  class << self
+    private
 
-  def self.magic_transform_params(args, default)
-    if args.size == 1 and args[0].is_a? Array
-      fail ArgumentError, "please pass coordinates separately, not in an array"
-    elsif (args.size == 3 or args.size == 2) and args.all? { |n| n.is_a? Numeric }
-      args.push(default) if args.size < 3
-      args
-    elsif args.size == 1 and args[0].is_a? Hash
-      opts, = args
-      [opts[:x] || default, opts[:y] || default, opts[:z] || default]
-    else
-      fail ArgumentError, "bad params for transform method"
+    def self.magic_transform_params(args, default)
+      if args.size == 1 and args[0].is_a? Array
+        fail ArgumentError, "please pass coordinates separately, not in an array"
+      elsif (args.size == 3 or args.size == 2) and args.all? { |n| n.is_a? Numeric }
+        args.push(default) if args.size < 3
+        args
+      elsif args.size == 1 and args[0].is_a? Hash
+        opts, = args
+        [opts[:x] || default, opts[:y] || default, opts[:z] || default]
+      else
+        fail ArgumentError, "bad params for transform method"
+      end
     end
   end
 end
@@ -303,38 +305,40 @@ class Shape
     self.transform(at * combined.inverse)
   end
 
-  protected
+  class << self
+    protected
 
-  def self.magic_shape_params(args, *expected)
-    opts = (args[-1].is_a? Hash) ? args.pop : {}
-    defaults = (expected[-1].is_a? Hash) ? expected.pop : {}
+    def magic_shape_params(args, *expected)
+      opts = (args[-1].is_a? Hash) ? args.pop : {}
+      defaults = (expected[-1].is_a? Hash) ? expected.pop : {}
 
-    expected.map do |name|
-      name_s = name.to_s
-      is_dia = name_s.start_with?("d")
+      expected.map do |name|
+        name_s = name.to_s
+        is_dia = name_s.start_with?("d")
 
-      if is_dia
-        rname = ("r" + name_s[1..-1]).to_sym
-        fail_msg = "please specify either #{name} or #{rname}"
-      else
-        fail_msg = "please specify #{name}"
-      end
+        if is_dia
+          rname = ("r" + name_s[1..-1]).to_sym
+          fail_msg = "please specify either #{name} or #{rname}"
+        else
+          fail_msg = "please specify #{name}"
+        end
 
 
-      if not args.empty?
-        args.shift
+        if not args.empty?
+          args.shift
 
-      elsif opts.key?(name)
-        opts[name]
+        elsif opts.key?(name)
+          opts[name]
 
-      elsif is_dia and opts.key?(rname)
-        opts[rname] * 2
+        elsif is_dia and opts.key?(rname)
+          opts[rname] * 2
 
-      elsif defaults.key?(name)
-        defaults[name]
+        elsif defaults.key?(name)
+          defaults[name]
 
-      else
-        fail ArgumentError, fail_msg
+        else
+          fail ArgumentError, fail_msg
+        end
       end
     end
   end
