@@ -39,6 +39,8 @@ end
 
 
 class Transform
+  # TODO: low-level transform methods should be private
+
   def move(*args)
     _move(*Transform.magic_transform_params(args, 0))
   end
