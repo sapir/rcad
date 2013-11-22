@@ -223,7 +223,7 @@ static gp_GTrsf transform_multiply(gp_GTrsf self, gp_GTrsf right)
     return gtrsf;
 }
 
-static gp_GTrsf transform_move(gp_GTrsf self, Standard_Real x, Standard_Real y,
+static gp_GTrsf transform__move(gp_GTrsf self, Standard_Real x, Standard_Real y,
     Standard_Real z)
 {
     gp_GTrsf gtrsf;
@@ -232,7 +232,7 @@ static gp_GTrsf transform_move(gp_GTrsf self, Standard_Real x, Standard_Real y,
     return gtrsf;
 }
 
-static gp_GTrsf transform_rotate(gp_GTrsf self, Standard_Real angle,
+static gp_GTrsf transform__rotate(gp_GTrsf self, Standard_Real angle,
     gp_Dir axis)
 {
     gp_Trsf rot;
@@ -243,7 +243,7 @@ static gp_GTrsf transform_rotate(gp_GTrsf self, Standard_Real angle,
     return gtrsf;
 }
 
-static gp_GTrsf transform_scale(gp_GTrsf self,
+static gp_GTrsf transform__scale(gp_GTrsf self,
     Standard_Real x, Standard_Real y, Standard_Real z)
 {
     gp_GTrsf gtrsf;
@@ -256,7 +256,7 @@ static gp_GTrsf transform_scale(gp_GTrsf self,
     return gtrsf;
 }
 
-static gp_GTrsf transform_mirror(gp_GTrsf self,
+static gp_GTrsf transform__mirror(gp_GTrsf self,
     Standard_Real x, Standard_Real y, Standard_Real z)
 {
     gp_Ax2 mirror_plane(gp::Origin(), gp_Dir(x, y, z));
@@ -918,10 +918,10 @@ void Init__rcad()
         .define_method("ofs_part", &transform_ofs_part)
         .define_method("ofs_part=", &transform_ofs_part_set)
         .define_method("*", &transform_multiply)
-        .define_method("move", &transform_move)
-        .define_method("rotate", &transform_rotate)
-        .define_method("scale", &transform_scale)
-        .define_method("mirror", &transform_mirror)
+        .define_method("_move", &transform__move)
+        .define_method("_rotate", &transform__rotate)
+        .define_method("_scale", &transform__scale)
+        .define_method("_mirror", &transform__mirror)
         .define_method("inverse", &transform_inverse);
 
     rb_const_set(rb_cObject, Identifier("I"), to_ruby<gp_GTrsf>(gp_GTrsf()));

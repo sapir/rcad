@@ -39,6 +39,22 @@ end
 
 
 class Transform
+  def move(*args)
+    _move(*args)
+  end
+
+  def rotate(*args)
+    _rotate(*args)
+  end
+
+  def scale(*args)
+    _scale(*args)
+  end
+
+  def mirror(*args)
+    _mirror(*args)
+  end
+
   def move_x(delta)
     move(delta, 0, 0)
   end
