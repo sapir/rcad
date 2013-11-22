@@ -40,7 +40,7 @@ end
 
 class Transform
   def move(*args)
-    _move(*args)
+    _move(*Transform.magic_transform_params(args, 0))
   end
 
   def rotate(*args)
@@ -48,7 +48,7 @@ class Transform
   end
 
   def scale(*args)
-    _scale(*args)
+    _scale(*Transform.magic_transform_params(args, 1))
   end
 
   def mirror(*args)
@@ -101,6 +101,21 @@ class Transform
 
   def mirror_z
     mirror(0, 0, 1)
+  end
+
+  private
+
+  def self.magic_transform_params(args, default)
+    if args.size == 1 and args[0].is_a? Array
+      fail ArgumentError, "please pass coordinates separately, not in an array"
+    elsif args.size == 3 and args.all? { |n| n.is_a? Numeric }
+      args
+    elsif args.size == 1 and args[0].is_a? Hash
+      opts, = args
+      [opts[:x] || default, opts[:y] || default, opts[:z] || default]
+    else
+      fail ArgumentError, "bad params for transform method"
+    end
   end
 end
 
