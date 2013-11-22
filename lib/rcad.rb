@@ -34,21 +34,23 @@ $tol = 50.um
 
 
 def to_polar(r, a)
-  return [r * Math::cos(a), r * Math::sin(a)]
+  return [r * Math.cos(a), r * Math.sin(a)]
 end
 
 
-class Transform
+module TransformableMixin
+  # TODO: consider removing move_foo and scale_foo methods
+
   def move_x(delta)
-    move(delta, 0, 0)
+    move(x: delta)
   end
 
   def move_y(delta)
-    move(0, delta, 0)
+    move(y: delta)
   end
 
   def move_z(delta)
-    move(0, 0, delta)
+    move(z: delta)
   end
 
   def rot_x(angle)
@@ -64,15 +66,15 @@ class Transform
   end
 
   def scale_x(factor)
-    scale(factor, 1, 1)
+    scale(x: factor)
   end
 
   def scale_y(factor)
-    scale(1, factor, 1)
+    scale(y: factor)
   end
 
   def scale_z(factor)
-    scale(1, 1, factor)
+    scale(z: factor)
   end
 
   def mirror_x
@@ -89,7 +91,55 @@ class Transform
 end
 
 
+class Transform
+  include TransformableMixin
+
+  # TODO: low-level transform methods should be private
+
+  def move(*args)
+    _move(*Transform.magic_transform_params(args, 0))
+  end
+
+  def rotate(angle, axis)
+    _rotate(angle, axis)
+  end
+
+  def scale(*args)
+    if args.size == 1 and args[0].is_a? Numeric
+      factor = args[0]
+      _scale(factor, factor, factor)
+    else
+      _scale(*Transform.magic_transform_params(args, 1))
+    end
+  end
+
+  def mirror(x, y, z)
+    _mirror(x, y, z)
+  end
+
+  class << self
+    private
+
+    def self.magic_transform_params(args, default)
+      if args.size == 1 and args[0].is_a? Array
+        fail ArgumentError, "please pass coordinates separately, not in an array"
+      elsif (args.size == 3 or args.size == 2) and args.all? { |n| n.is_a? Numeric }
+        args.push(default) if args.size < 3
+        args
+      elsif args.size == 1 and args[0].is_a? Hash
+        opts, = args
+        [opts[:x] || default, opts[:y] || default, opts[:z] || default]
+      else
+        fail ArgumentError, "bad params for transform method"
+      end
+    end
+  end
+end
+
+
 class Shape
+  include TransformableMixin
+
   # if @shape isn't defined in a Shape's initialize() method, then render()
   # should be overridden to create and return it on-the-fly.
   def render
@@ -123,68 +173,20 @@ class Shape
     TransformedShape.new(self, trsf)
   end
 
-  def move(x, y, z)
-    TransformedShape.new(self, I.move(x, y, z))
+  def move(*args)
+    TransformedShape.new(self, I.move(*args))
   end
 
-  def rotate(angle, axis)
-    TransformedShape.new(self, I.rotate(angle, axis))
+  def rotate(*args)
+    TransformedShape.new(self, I.rotate(*args))
   end
 
-  def scale(x, y, z)
-    TransformedShape.new(self, I.scale(x, y, z))
+  def scale(*args)
+    TransformedShape.new(self, I.scale(*args))
   end
 
-  def mirror(x, y, z)
-    TransformedShape.new(self, I.mirror(x, y, z))
-  end
-
-  def move_x(delta)
-    move(delta, 0, 0)
-  end
-
-  def move_y(delta)
-    move(0, delta, 0)
-  end
-
-  def move_z(delta)
-    move(0, 0, delta)
-  end
-
-  def rot_x(angle)
-    rotate(angle, [1, 0, 0])
-  end
-
-  def rot_y(angle)
-    rotate(angle, [0, 1, 0])
-  end
-
-  def rot_z(angle)
-    rotate(angle, [0, 0, 1])
-  end
-
-  def scale_x(factor)
-    scale(factor, 1, 1)
-  end
-
-  def scale_y(factor)
-    scale(1, factor, 1)
-  end
-
-  def scale_z(factor)
-    scale(1, 1, factor)
-  end
-
-  def mirror_x
-    mirror(1, 0, 0)
-  end
-
-  def mirror_y
-    mirror(0, 1, 0)
-  end
-
-  def mirror_z
-    mirror(0, 0, 1)
+  def mirror(*args)
+    TransformedShape.new(self, I.mirror(*args))
   end
 
   def extrude(height, twist=0)
@@ -196,11 +198,7 @@ class Shape
   end
 
   def bbox
-    if @bbox == nil
-      @bbox = _bbox
-    end
-
-    @bbox
+    @bbox ||= _bbox
   end
 
   def minx
@@ -306,6 +304,44 @@ class Shape
 
     self.transform(at * combined.inverse)
   end
+
+  class << self
+    protected
+
+    def magic_shape_params(args, *expected)
+      opts = (args[-1].is_a? Hash) ? args.pop : {}
+      defaults = (expected[-1].is_a? Hash) ? expected.pop : {}
+
+      expected.map do |name|
+        name_s = name.to_s
+        is_dia = name_s.start_with?("d")
+
+        if is_dia
+          rname = ("r" + name_s[1..-1]).to_sym
+          fail_msg = "please specify either #{name} or #{rname}"
+        else
+          fail_msg = "please specify #{name}"
+        end
+
+
+        if not args.empty?
+          args.shift
+
+        elsif opts.key?(name)
+          opts[name]
+
+        elsif is_dia and opts.key?(rname)
+          opts[rname] * 2
+
+        elsif defaults.key?(name)
+          defaults[name]
+
+        else
+          fail ArgumentError, fail_msg
+        end
+      end
+    end
+  end
 end
 
 $shape_stack = []
@@ -382,20 +418,20 @@ class TransformedShape < Shape
     TransformedShape.new(@shape, trsf * @trsf)
   end
 
-  def move(x, y, z)
-    TransformedShape.new(@shape, @trsf.move(x, y, z))
+  def move(*args)
+    TransformedShape.new(@shape, @trsf.move(*args))
   end
 
-  def rotate(angle, axis)
-    TransformedShape.new(@shape, @trsf.rotate(angle, axis))
+  def rotate(*args)
+    TransformedShape.new(@shape, @trsf.rotate(*args))
   end
 
-  def scale(x, y, z)
-    TransformedShape.new(@shape, @trsf.scale(x, y, z))
+  def scale(*args)
+    TransformedShape.new(@shape, @trsf.scale(*args))
   end
 
-  def mirror(x, y, z)
-    TransformedShape.new(@shape, @trsf.mirror(x, y, z))
+  def mirror(*args)
+    TransformedShape.new(@shape, @trsf.mirror(*args))
   end
 end
 
@@ -413,9 +449,8 @@ end
 class RegularPolygon < Polygon
   attr_reader :sides, :radius
 
-  def initialize(sides, radius)
-    @sides = sides
-    @radius = radius
+  def initialize(*args)
+    @sides, @radius = Shape.magic_shape_params(args, :sides, :r)
 
     angles = (1..sides).map { |i| i * 2 * Math::PI / sides }
     points = angles.map { |a| to_polar(radius, a) }
@@ -451,8 +486,8 @@ end
 class Circle < Shape
   attr_accessor :dia
 
-  def initialize(dia)
-    @dia = dia
+  def initialize(*args)
+    @dia, = Shape.magic_shape_params(args, :d)
   end
 end
 
@@ -483,10 +518,10 @@ end
 class Cone < Shape
   attr_accessor :height, :bottom_dia, :top_dia
 
-  def initialize(height, bottom_dia, top_dia=0)
-    @height = height
-    @bottom_dia = bottom_dia
-    @top_dia = top_dia
+  def initialize(*args)
+    # TODO: maybe make positional order be (:d0, [:dh], :h)
+    @height, @bottom_dia, @top_dia = Shape.magic_shape_params(
+      args, :h, :d0, :dh, dh: 0)
   end
 
   def bottom_radius
@@ -502,9 +537,8 @@ end
 class Cylinder < Shape
   attr_accessor :height, :dia
 
-  def initialize(height, dia)
-    @height = height
-    @dia = dia
+  def initialize(*args)
+    @dia, @height = Shape.magic_shape_params(args, :d, :h)
   end
 
   def radius
@@ -516,8 +550,8 @@ end
 class Sphere < Shape
   attr_accessor :dia
 
-  def initialize(dia)
-    @dia = dia
+  def initialize(*args)
+    @dia, = Shape.magic_shape_params(args, :d)
   end
 
   def radius
@@ -539,10 +573,9 @@ end
 class Torus < Shape
   attr_accessor :inner_dia, :outer_dia, :angle
 
-  def initialize(inner_dia, outer_dia, angle=nil)
-    @inner_dia = inner_dia
-    @outer_dia = outer_dia
-    @angle = angle
+  def initialize(*args)
+    @inner_dia, @outer_dia, @angle = Shape.magic_shape_params(
+      args, :id, :od, :angle, angle: nil)
   end
 
   def inner_radius
@@ -579,9 +612,9 @@ end
 class RegularPrism < LinearExtrusion
   attr_reader :sides, :radius
 
-  def initialize(sides, radius, height)
-    @sides = sides
-    @radius = radius
+  def initialize(*args)
+    @sides, @radius, height = Shape.magic_shape_params(args,
+      :sides, :r, :h)
 
     poly = RegularPolygon.new(sides, radius)
     super(poly, height)
