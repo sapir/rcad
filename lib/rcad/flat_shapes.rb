@@ -16,7 +16,7 @@ class RegularPolygon < Polygon
   attr_reader :sides, :radius
 
   def initialize(*args)
-    @sides, @radius = Shape.magic_shape_params(args, :sides, :r)
+    @sides, @radius = magic_shape_params(args, :sides, :r)
 
     angles = (1..sides).map { |i| i * 2 * Math::PI / sides }
     points = angles.map { |a| to_polar(radius, a) }
@@ -53,7 +53,7 @@ class Circle < Shape
   attr_accessor :dia
 
   def initialize(*args)
-    @dia, = Shape.magic_shape_params(args, :d)
+    @dia, = magic_shape_params(args, :d)
   end
 end
 

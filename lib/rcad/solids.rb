@@ -129,7 +129,7 @@ class RegularPrism < LinearExtrusion
   attr_reader :sides, :radius
 
   def initialize(*args)
-    @sides, @radius, height = Shape.magic_shape_params(args,
+    @sides, @radius, height = magic_shape_params(args,
       :sides, :r, :h)
 
     poly = RegularPolygon.new(sides, radius)
