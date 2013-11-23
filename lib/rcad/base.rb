@@ -96,7 +96,7 @@ class Transform
   # TODO: low-level transform methods should be private
 
   def move(*args)
-    _move(*Transform.magic_transform_params(args, 0))
+    _move(*magic_transform_params(args, 0))
   end
 
   def rotate(angle, axis)
@@ -108,7 +108,7 @@ class Transform
       factor = args[0]
       _scale(factor, factor, factor)
     else
-      _scale(*Transform.magic_transform_params(args, 1))
+      _scale(*magic_transform_params(args, 1))
     end
   end
 
@@ -116,21 +116,19 @@ class Transform
     _mirror(x, y, z)
   end
 
-  class << self
-    private
+  protected
 
-    def self.magic_transform_params(args, default)
-      if args.size == 1 and args[0].is_a? Array
-        fail ArgumentError, "please pass coordinates separately, not in an array"
-      elsif (args.size == 3 or args.size == 2) and args.all? { |n| n.is_a? Numeric }
-        args.push(default) if args.size < 3
-        args
-      elsif args.size == 1 and args[0].is_a? Hash
-        opts, = args
-        [opts[:x] || default, opts[:y] || default, opts[:z] || default]
-      else
-        fail ArgumentError, "bad params for transform method"
-      end
+  def magic_transform_params(args, default)
+    if args.size == 1 and args[0].is_a? Array
+      fail ArgumentError, "please pass coordinates separately, not in an array"
+    elsif (args.size == 3 or args.size == 2) and args.all? { |n| n.is_a? Numeric }
+      args.push(default) if args.size < 3
+      args
+    elsif args.size == 1 and args[0].is_a? Hash
+      opts, = args
+      [opts[:x] || default, opts[:y] || default, opts[:z] || default]
+    else
+      fail ArgumentError, "bad params for transform method"
     end
   end
 end
@@ -296,40 +294,38 @@ class Shape
     self.transform(at * combined.inverse)
   end
 
-  class << self
-    protected
+  protected
 
-    def magic_shape_params(args, *expected)
-      opts = (args[-1].is_a? Hash) ? args.pop : {}
-      defaults = (expected[-1].is_a? Hash) ? expected.pop : {}
+  def magic_shape_params(args, *expected)
+    opts = (args[-1].is_a? Hash) ? args.pop : {}
+    defaults = (expected[-1].is_a? Hash) ? expected.pop : {}
 
-      expected.map do |name|
-        name_s = name.to_s
-        is_dia = name_s.start_with?("d")
+    expected.map do |name|
+      name_s = name.to_s
+      is_dia = name_s.start_with?("d")
 
-        if is_dia
-          rname = ("r" + name_s[1..-1]).to_sym
-          fail_msg = "please specify either #{name} or #{rname}"
-        else
-          fail_msg = "please specify #{name}"
-        end
+      if is_dia
+        rname = ("r" + name_s[1..-1]).to_sym
+        fail_msg = "please specify either #{name} or #{rname}"
+      else
+        fail_msg = "please specify #{name}"
+      end
 
 
-        if not args.empty?
-          args.shift
+      if not args.empty?
+        args.shift
 
-        elsif opts.key?(name)
-          opts[name]
+      elsif opts.key?(name)
+        opts[name]
 
-        elsif is_dia and opts.key?(rname)
-          opts[rname] * 2
+      elsif is_dia and opts.key?(rname)
+        opts[rname] * 2
 
-        elsif defaults.key?(name)
-          defaults[name]
+      elsif defaults.key?(name)
+        defaults[name]
 
-        else
-          fail ArgumentError, fail_msg
-        end
+      else
+        fail ArgumentError, fail_msg
       end
     end
   end

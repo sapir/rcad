@@ -36,7 +36,7 @@ class Cone < Shape
 
   def initialize(*args)
     # TODO: maybe make positional order be (:d0, [:dh], :h)
-    @height, @bottom_dia, @top_dia = Shape.magic_shape_params(
+    @height, @bottom_dia, @top_dia = magic_shape_params(
       args, :h, :d0, :dh, dh: 0)
   end
 
@@ -54,7 +54,7 @@ class Cylinder < Shape
   attr_accessor :height, :dia
 
   def initialize(*args)
-    @dia, @height = Shape.magic_shape_params(args, :d, :h)
+    @dia, @height = magic_shape_params(args, :d, :h)
   end
 
   def radius
@@ -67,7 +67,7 @@ class Sphere < Shape
   attr_accessor :dia
 
   def initialize(*args)
-    @dia, = Shape.magic_shape_params(args, :d)
+    @dia, = magic_shape_params(args, :d)
   end
 
   def radius
@@ -90,7 +90,7 @@ class Torus < Shape
   attr_accessor :inner_dia, :outer_dia, :angle
 
   def initialize(*args)
-    @inner_dia, @outer_dia, @angle = Shape.magic_shape_params(
+    @inner_dia, @outer_dia, @angle = magic_shape_params(
       args, :id, :od, :angle, angle: nil)
   end
 
