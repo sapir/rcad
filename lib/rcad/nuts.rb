@@ -25,11 +25,11 @@ class HexNut < Shape
 
   attr_accessor :bolt_dia, :xytol, :ztol, :full
 
-  def initialize(bolt_dia, xytol=0, ztol=0, full=false)
+  def initialize(bolt_dia, opts = {})
     @bolt_dia = bolt_dia
-    @xytol = xytol
-    @ztol = ztol
-    @full = full
+    @xytol = opts[:xytol] || 0
+    @ztol = opts[:ztol] || 0
+    @full = opts.key?(:full) ? opts[:full] : false
   end
 
   def render
