@@ -70,12 +70,12 @@ class GearProfile < Shape
 
   def render
     # tooth thickness at tooth tip (TODO: is this correct?)
-    tooth_tip_thickness = tooth_thickness - addendum * Math::sin(p_angle)
+    tooth_tip_thickness = tooth_thickness - addendum * Math.sin(p_angle)
 
     # half of thickness at root/center/tip in degrees
-    half_t_root_angle = Math::atan(tooth_thickness / 2 / (root_dia / 2))
-    half_t_angle = Math::atan(tooth_thickness / 2 / (pitch_dia / 2))
-    half_t_tip_angle = Math::atan(tooth_tip_thickness / 2 / (outer_dia / 2))
+    half_t_root_angle = Math.atan(tooth_thickness / 2 / (root_dia / 2))
+    half_t_angle = Math.atan(tooth_thickness / 2 / (pitch_dia / 2))
+    half_t_tip_angle = Math.atan(tooth_tip_thickness / 2 / (outer_dia / 2))
 
     root_r = root_dia / 2
     pitch_r = pitch_dia / 2
@@ -127,7 +127,7 @@ class HelicalGear < Shape
   end
 
   def twist
-    twist_length = Math::tan(helix_angle) * height
+    twist_length = Math.tan(helix_angle) * height
     pitch_circumference = Math::PI * profile.pitch_dia
 
     twist_length * (2 * Math::PI / pitch_circumference)
