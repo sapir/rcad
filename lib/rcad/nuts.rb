@@ -56,11 +56,11 @@ class Bolt < Shape
 
   attr_accessor :bolt_dia, :bolt_len, :xytol, :ztol
   
-  def initialize(bolt_dia, bolt_len, xytol=0, ztol=0)
+  def initialize(bolt_dia, bolt_len, opts = {})
     @bolt_dia = bolt_dia
     @bolt_len = bolt_len
-    @xytol = xytol
-    @ztol = ztol
+    @xytol = opts[:xytol] || 0
+    @ztol = opts[:ztol] || 0
   end
 
   def head_height
