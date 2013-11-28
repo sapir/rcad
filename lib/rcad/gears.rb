@@ -19,12 +19,12 @@ class GearProfile < Shape
   # p_angle - pressure angle.
   #   it seems 20 deg angle is better for torque, but
   #   14.5 deg angle is better for backlash.
-  def initialize(pitch_dia, module_=4, p_angle=20)
+  def initialize(opts)
     # converting everything to floats ensures that floating point
     # division will be performed later
-    @pitch_dia = pitch_dia.to_f
-    @module_ = module_.to_f
-    @p_angle = p_angle.to_f
+    @pitch_dia = opts.fetch(:pitch_dia).to_f
+    @module_ = (opts[:module] || 4).to_f
+    @p_angle = (opts[:p_angle] || 20).to_f
 
     if @pitch_dia % @module_ != 0
       raise ArgumentError, "non-integer number of teeth!"
@@ -100,9 +100,12 @@ end
 class SpurGear < Shape
   attr_reader :height, :profile
 
-  def initialize(height, *args)
-    @height = height
-    @profile = GearProfile.new(*args)
+  def initialize(opts)
+    @height = opts.fetch(:h)
+    opts.delete(:h)
+
+    @profile = GearProfile.new(opts)
+
     @shape = profile.extrude(height)
   end
 end
@@ -111,10 +114,14 @@ end
 class HelicalGear < Shape
   attr_reader :height, :helix_angle, :profile
 
-  def initialize(pitch_dia, height, helix_angle=Math::PI / 3.0)
-    @height = height
-    @helix_angle = helix_angle
-    @profile = GearProfile.new(pitch_dia)
+  def initialize(opts)
+    @height = opts.fetch(:h)
+    @helix_angle = opts[:helix_angle] || (Math::PI / 3.0)
+
+    opts.delete(:h)
+    opts.delete(:helix_angle)
+
+    @profile = GearProfile.new(opts)
 
     @shape = profile.extrude(height, twist)
   end
@@ -129,10 +136,13 @@ end
 
 
 class HerringboneGear < Shape
-  attr_reader :helical_gear
+  attr_reader :height, :helical_gear
 
-  def initialize(pitch_dia, height, helix_angle=Math::PI / 3.0)
-    @helical_gear = HelicalGear.new(pitch_dia, height / 2.0, helix_angle)
+  def initialize(opts)
+    @height = opts.fetch(:h)
+
+    opts[:h] = height / 2.0
+    @helical_gear = HelicalGear.new(opts)
 
     @shape = add do
         ~helical_gear
