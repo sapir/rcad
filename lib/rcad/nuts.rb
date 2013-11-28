@@ -3,12 +3,8 @@
 require 'rcad'
 
 
-class BaseBoltPart < Shape
-  attr_accessor :bolt_dia
-
-  def initialize(bolt_dia)
-    @bolt_dia = bolt_dia
-  end
+module NutSizesMixin
+  module_function
 
   def nut_height
     0.8 * bolt_dia
@@ -19,17 +15,18 @@ class BaseBoltPart < Shape
   end
 
   def nut_dia_across_corners
-    nut_dia_across_flats / Math::cos(30.deg_to_rad)
+    nut_dia_across_flats / Math.cos(30.deg_to_rad)
   end
 end
 
 
-class HexNut < BaseBoltPart
-  attr_accessor :xytol, :ztol, :full
+class HexNut < Shape
+  include NutSizesMixin
+
+  attr_accessor :bolt_dia, :xytol, :ztol, :full
 
   def initialize(bolt_dia, xytol=0, ztol=0, full=false)
-    super(bolt_dia)
-
+    @bolt_dia = bolt_dia
     @xytol = xytol
     @ztol = ztol
     @full = full
@@ -54,12 +51,13 @@ class HexNut < BaseBoltPart
 end
 
 
-class Bolt < BaseBoltPart
-  attr_accessor :bolt_len, :xytol, :ztol
+class Bolt < Shape
+  include NutSizesMixin
+
+  attr_accessor :bolt_dia, :bolt_len, :xytol, :ztol
   
   def initialize(bolt_dia, bolt_len, xytol=0, ztol=0)
-    super(bolt_dia)
-
+    @bolt_dia = bolt_dia
     @bolt_len = bolt_len
     @xytol = xytol
     @ztol = ztol
