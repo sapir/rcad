@@ -54,13 +54,14 @@ end
 class Bolt < Shape
   include NutSizesMixin
 
-  attr_accessor :bolt_dia, :bolt_len, :xytol, :ztol
+  attr_accessor :bolt_dia, :bolt_len, :xytol, :ztol, :with_head
   
   def initialize(bolt_dia, bolt_len, opts = {})
     @bolt_dia = bolt_dia
     @bolt_len = bolt_len
     @xytol = opts[:xytol] || 0
     @ztol = opts[:ztol] || 0
+    @with_head = opts.key?(:with_head) ? opts[:with_head] : true
   end
 
   def head_height
@@ -72,6 +73,11 @@ class Bolt < Shape
   end
 
   def render
+    unless with_head
+      # use bolt_len instead of total_len because head isn't included
+      return cylinder(d: bolt_dia + @xytol, h: bolt_len + @ztol)
+    end
+
     d = nut_dia_across_corners + @xytol
     h = head_height + @ztol
     head = reg_prism(sides: 6, r: d / 2.0, h: h)
