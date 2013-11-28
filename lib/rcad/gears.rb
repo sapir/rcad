@@ -20,6 +20,9 @@ class GearProfile < Shape
   #   it seems 20 deg angle is better for torque, but
   #   14.5 deg angle is better for backlash.
   def initialize(opts)
+    # TODO: allow specifying different combinations of options, and calculate
+      # the rest from those specified
+
     # converting everything to floats ensures that floating point
     # division will be performed later
     @pitch_dia = opts.fetch(:pitch_dia).to_f
