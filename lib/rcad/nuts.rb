@@ -76,10 +76,9 @@ class Bolt < Shape
     h = head_height + @ztol
     head = reg_prism(sides: 6, r: d / 2.0, h: h)
 
-    add do
+    (add do
         ~head
         ~cylinder(d: bolt_dia + @xytol, h: total_len + @ztol)
-          .move_z(-head_height)
-      end
+      end).move_z(-head_height)
   end
 end
