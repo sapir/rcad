@@ -74,11 +74,11 @@ class Bolt < Shape
   def render
     d = nut_dia_across_corners + @xytol
     h = head_height + @ztol
-    head = reg_prism(6, d / 2.0, h)
+    head = reg_prism(sides: 6, r: d / 2.0, h: h)
 
     add do
         ~head
-        ~cylinder(total_len + @ztol, bolt_dia + @xytol)
+        ~cylinder(d: bolt_dia + @xytol, h: total_len + @ztol)
           .move_z(-head_height)
       end
   end
