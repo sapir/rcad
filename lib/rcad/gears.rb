@@ -142,20 +142,22 @@ end
 
 
 class HerringboneGear < Shape
-  attr_reader :height, :helical_gear
+  attr_reader :height
 
   def initialize(opts)
     @height = opts.fetch(:h)
 
-    helical_opts = opts.dup
-    helical_opts[:h] = height / 2.0
-    @helical_gear = HelicalGear.new(helical_opts)
-
     @shape = add do
-        ~helical_gear
-        ~helical_gear
-          .mirror_z
-          .move_z(height)
+        helical_opts = opts.dup
+        helical_opts[:h] = height / 2.0
+        bottom_half = ~HelicalGear.new(helical_opts)
+
+        # make top half's helix twist backwards from where bottom half's
+        # twist ends
+        helical_opts[:helix_angle] = -bottom_half.helix_angle
+        top_half = ~HelicalGear.new(helical_opts)
+          .move_z(height / 2.0)
+          .rot_z(bottom_half.twist)
       end
   end
 end
