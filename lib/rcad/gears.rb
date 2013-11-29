@@ -105,9 +105,11 @@ class SpurGear < Shape
 
   def initialize(opts)
     @height = opts.fetch(:h)
-    opts.delete(:h)
 
-    @profile = GearProfile.new(opts)
+    profile_opts = opts
+    profile_opts.delete(:h)
+
+    @profile = GearProfile.new(profile_opts)
 
     @shape = profile.extrude(height)
   end
@@ -121,10 +123,11 @@ class HelicalGear < Shape
     @height = opts.fetch(:h)
     @helix_angle = opts[:helix_angle] || (Math::PI / 3.0)
 
-    opts.delete(:h)
-    opts.delete(:helix_angle)
+    profile_opts = opts.dup
+    profile_opts.delete(:h)
+    profile_opts.delete(:helix_angle)
 
-    @profile = GearProfile.new(opts)
+    @profile = GearProfile.new(profile_opts)
 
     @shape = profile.extrude(height, twist)
   end
@@ -144,8 +147,9 @@ class HerringboneGear < Shape
   def initialize(opts)
     @height = opts.fetch(:h)
 
-    opts[:h] = height / 2.0
-    @helical_gear = HelicalGear.new(opts)
+    helical_opts = opts.dup
+    helical_opts[:h] = height / 2.0
+    @helical_gear = HelicalGear.new(helical_opts)
 
     @shape = add do
         ~helical_gear
