@@ -58,14 +58,9 @@ class Circle < Shape
 end
 
 
-class Text < Shape
-    # TODO
-end
-
-
 make_maker :polygon, Polygon
 make_maker :reg_poly, RegularPolygon
 make_maker :rectangle, Rectangle
 make_maker :square, Square
 make_maker :circle, Circle
-make_maker :text, Text
+# if you're looking for the text function, see text.rb
