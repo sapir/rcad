@@ -3,10 +3,12 @@
 #include <gp_Pnt.hxx>
 #include <gp_Vec.hxx>
 #include <gp_Circ.hxx>
+#include <TColgp_Array1OfPnt2d.hxx>
 #include <TColgp_Array2OfPnt.hxx>
 #include <Poly_Triangulation.hxx>
 #include <Geom_BezierSurface.hxx>
 #include <Geom_Circle.hxx>
+#include <Geom2d_BezierCurve.hxx>
 #include <GCE2d_MakeSegment.hxx>
 #include <TopoDS.hxx>
 #include <BRepPrimAPI_MakeBox.hxx>
@@ -22,6 +24,7 @@
 #include <BRepAlgoAPI_Common.hxx>
 #include <BRepAlgoAPI_Common.hxx>
 #include <BRepBuilderAPI_MakeEdge.hxx>
+#include <BRepBuilderAPI_MakeEdge2d.hxx>
 #include <BRepBuilderAPI_MakeWire.hxx>
 #include <BRepBuilderAPI_MakePolygon.hxx>
 #include <BRepBuilderAPI_MakeFace.hxx>
@@ -901,6 +904,80 @@ static Object _hull(Array shapes)
     }
 }
 
+static TopoDS_Shape _new_line2D(Object p1, Object p2)
+{
+    gp_Pnt2d gp1 = from_ruby<gp_Pnt2d>(p1);
+    gp_Pnt2d gp2 = from_ruby<gp_Pnt2d>(p2);
+    return BRepBuilderAPI_MakeEdge2d(gp1, gp2);
+}
+
+static TopoDS_Shape _new_curve2D(Array points)
+{
+    // keep this pointer so we can use the derived class
+    Geom2d_BezierCurve *curvePtr =
+        new Geom2d_BezierCurve(TColgp_Array1OfPnt2d(1, points.size()));
+    Handle_Geom2d_Curve curve(curvePtr);
+
+    for (size_t i = 0; i < points.size(); ++i) {
+        curvePtr->SetPole(i + 1, from_ruby<gp_Pnt2d>(points[i]));
+    }
+
+    return BRepBuilderAPI_MakeEdge2d(curve);
+}
+
+static TopoDS_Shape _new_wire(Array edges)
+{
+    if (edges.size() < 1) {
+        throw Exception(rb_eArgError,
+            "Wires must have at least 1 edge");
+    }
+
+    BRepBuilderAPI_MakeWire wire_maker;
+
+    for (size_t i = 0; i < edges.size(); ++i) {
+        TopoDS_Shape edge_shape = from_ruby<TopoDS_Shape>(edges[i]);
+        wire_maker.Add(TopoDS::Edge(edge_shape));
+    }
+
+    return wire_maker;
+}
+
+static TopoDS_Shape _new_face(Array wires)
+{
+    if (wires.size() < 1) {
+        throw Exception(rb_eArgError,
+            "Faces must have at least 1 wire");
+    }
+
+    TopoDS_Wire first_wire = TopoDS::Wire(from_ruby<TopoDS_Shape>(wires[0]));
+    BRepBuilderAPI_MakeFace face_maker(first_wire);
+
+    for (size_t i = 1; i < wires.size(); ++i) {
+        TopoDS_Shape wire_shape = from_ruby<TopoDS_Shape>(wires[i]);
+        face_maker.Add(TopoDS::Wire(wire_shape));
+    }
+
+    return face_maker;
+}
+
+static TopoDS_Shape _new_compound(Array shapes)
+{
+    if (shapes.size() < 1) {
+        throw Exception(rb_eArgError,
+            "Compounds must have at least 1 shape");
+    }
+
+    TopoDS_Compound compound;
+    BRep_Builder builder;
+    builder.MakeCompound(compound);
+
+    for (size_t i = 0; i < shapes.size(); ++i) {
+        builder.Add(compound, from_ruby<TopoDS_Shape>(shapes[i]));
+    }
+
+    return compound;
+}
+
 
 extern "C"
 void Init__rcad()
@@ -931,7 +1008,12 @@ void Init__rcad()
         .add_handler<Standard_Failure>(translate_oce_exception)
         .define_method("write_stl", &shape_write_stl)
         .define_method("_bbox", &shape__bbox)
-        .define_singleton_method("from_stl", &shape_from_stl);
+        .define_singleton_method("from_stl", &shape_from_stl)
+        .define_singleton_method("_new_line2D", &_new_line2D)
+        .define_singleton_method("_new_curve2D", &_new_curve2D)
+        .define_singleton_method("_new_wire", &_new_wire)
+        .define_singleton_method("_new_face", &_new_face)
+        .define_singleton_method("_new_compound", &_new_compound);
 
     Class rb_cTransformedShape = define_class("TransformedShape", rb_cShape)
         .add_handler<Standard_Failure>(translate_oce_exception)
