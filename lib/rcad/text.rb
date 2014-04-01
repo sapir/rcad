@@ -1,7 +1,7 @@
+require 'set'
 require 'rcad/_rcad'
 require 'rcad/base'
 require 'cairo'
-
 
 class Text < Shape
   attr_reader :text, :font_name, :font_size
@@ -13,11 +13,9 @@ class Text < Shape
   end
 
   def render
-    path = _make_path
-    wap = Text._path_to_wires_and_pts(path)
-    # wap.each { |w,p| puts w.to_s }
-    # return cairoPathToOccShape(path)
-    return Shape._new_face(wap.map { |w, p| w })
+    path = make_path
+    wap = Text.path_to_wires_and_pts(path)
+    return Shape._new_compound(Text.group_wires_into_faces(wap))
   end
 
   def slant
@@ -28,11 +26,14 @@ class Text < Shape
     Cairo::FONT_WEIGHT_NORMAL
   end
 
-  def _make_path
+
+  private
+
+  def make_path
     # actually, we want an in-memory surface, but it seems ruby-cairo
     # doesn't support that right now
     surf = Cairo::SVGSurface.new("tmp.svg", 1024, 1024)
-    
+
     ctx = Cairo::Context.new(surf)
     ctx.select_font_face(font_name, slant, weight)
     ctx.set_font_size(font_size)
@@ -45,7 +46,7 @@ class Text < Shape
     ctx.copy_path()
   end
 
-  def Text._path_to_wires_and_pts(path)
+  def Text.path_to_wires_and_pts(path)
     cur_wire_edges = []
     wires_and_pts = []
     start_pt = nil
@@ -86,6 +87,53 @@ class Text < Shape
     end
 
     wires_and_pts
+  end
+
+  # wires must be non-intersecting (I expect cairo text paths to be fine)
+  def Text.group_wires_into_faces(wires_and_pts)
+    # for each wire, set of wires it contains
+    graph_a_contains_bs = Hash[
+      wires_and_pts.map do |w,_|
+        f = Shape._new_face([w])
+
+        contained = wires_and_pts
+          .select {|_,p| _is_pnt2D_in_face(p, f)}
+          .map {|w,p| w}
+
+        [w, Set.new(contained)]
+      end]
+
+    # build direct graph and set of root wires not contained in any other wre
+    graph_a_directly_contains_bs = {}
+    root_wires = Set.new(wires_and_pts.map {|w,_| w})
+
+    graph_a_contains_bs.each_pair do |a,bs|
+        direct_bs = bs.dup
+        bs.each {|b| direct_bs.subtract(graph_a_contains_bs[b])}
+        graph_a_directly_contains_bs[a] = direct_bs if !direct_bs.empty?
+
+        root_wires.subtract(direct_bs)
+      end
+
+    root_wires.map do |root|
+      Shape._new_face(Text.oriented_wires(
+        root, graph_a_directly_contains_bs))
+    end
+  end
+
+  # gets all children of root, with wire orientation alternating between
+  # parents and childs
+  def Text.oriented_wires(root, graph, reverse=false)
+    ret = [reverse ? root._reversed  : root]
+
+    children = graph[root]
+    if children
+      children.each do |child_wire|
+        ret.concat(Text.oriented_wires(child_wire, graph, !reverse))
+      end
+    end
+
+    ret
   end
 end
 

@@ -176,6 +176,12 @@ static Standard_Real get_tolerance()
 }
 
 
+static TopoDS_Shape rendered_shape__reversed(TopoDS_Shape self)
+{
+    return self.Oriented(TopAbs_REVERSED);
+}
+
+
 static String transform_to_s(gp_GTrsf self)
 {
     gp_Mat vec = self.VectorialPart();
@@ -336,7 +342,7 @@ Object shape__bbox(Object self)
     bbox.Get(
         minXYZ[0], minXYZ[1], minXYZ[2],
         maxXYZ[0], maxXYZ[1], maxXYZ[2]);
-    
+
     const Standard_Real gap = bbox.GetGap();
     for (int i = 0; i < 3; ++i) {
         minXYZ[i] += gap;
@@ -978,11 +984,21 @@ static TopoDS_Shape _new_compound(Array shapes)
     return compound;
 }
 
+static bool _is_pnt2D_in_face(Object p, TopoDS_Shape face_shape)
+{
+    gp_Pnt2d gpnt = from_ruby<gp_Pnt2d>(p);
+    TopoDS_Face face = TopoDS::Face(face_shape);
+
+    BRepTopAdaptor_FClass2d fclass2D(face, Precision::PConfusion());
+    return (fclass2D.Perform(gpnt) == TopAbs_IN);
+}
+
 
 extern "C"
 void Init__rcad()
 {
-    rb_cRenderedShape = define_class<TopoDS_Shape>("RenderedShape");
+    rb_cRenderedShape = define_class<TopoDS_Shape>("RenderedShape")
+        .define_method("_reversed", &rendered_shape__reversed);
 
     Data_Type<Standard_Failure> rb_cOCEError =
         define_class("OCEError", rb_eRuntimeError);
@@ -1077,4 +1093,5 @@ void Init__rcad()
         .define_method("render", &revolution_render);
 
     define_global_function("_hull", &_hull);
+    define_global_function("_is_pnt2D_in_face", &_is_pnt2D_in_face);
 }
