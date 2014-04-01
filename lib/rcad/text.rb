@@ -17,7 +17,7 @@ class Text < Shape
     wap = Text._path_to_wires_and_pts(path)
     # wap.each { |w,p| puts w.to_s }
     # return cairoPathToOccShape(path)
-    puts "yum"
+    return Shape._new_face(wap.map { |w, p| w })
   end
 
   def slant
@@ -47,34 +47,35 @@ class Text < Shape
 
   def Text._path_to_wires_and_pts(path)
     cur_wire_edges = []
-    wires = []
+    wires_and_pts = []
     start_pt = nil
     cur_pt = nil
 
     path.each do |instr|
+      points = instr.points.map { |p| [p.x, p.y] }
+
       if instr.move_to?
-        cur_pt = instr.points[0]
+        cur_pt = points[0]
         start_pt = cur_pt   # move_to begins a new sub-path
 
       elsif instr.line_to?
-        p = instr.points[0]
-        cur_wire_edges << [cur_pt, p] unless cur_pt == nil
+        p = points[0]
+        cur_wire_edges << Shape._new_line2D(cur_pt, p) unless cur_pt == nil
         cur_pt = p
 
       elsif instr.curve_to?
-        p1, p2, p3 = instr.points
-        curve = [cur_pt, p1, p2, p3]
-        cur_wire_edges << curve
-        cur_pt = p3
+        cur_wire_edges << Shape._new_curve2D([cur_pt] + points)
+        cur_pt = points[-1]
 
       elsif instr.close_path?
         if start_pt != nil and cur_pt != nil and start_pt != cur_pt
-          cur_wire_edges << [cur_pt, start_pt]
+          cur_wire_edges << Shape._new_line2D(cur_pt, start_pt)
           cur_pt = start_pt
         end
 
         if not cur_wire_edges.empty?
-          wires << [cur_wire_edges, start_pt]
+          wire = Shape._new_wire(cur_wire_edges)
+          wires_and_pts << [wire, start_pt]
 
           # get ready for next wire
           cur_wire_edges = []
@@ -84,7 +85,7 @@ class Text < Shape
       end
     end
 
-    wires
+    wires_and_pts
   end
 end
 
