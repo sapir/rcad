@@ -4,12 +4,14 @@ require 'rcad/base'
 require 'cairo'
 
 class Text < Shape
-  attr_reader :text, :font_name, :font_size
+  attr_reader :text, :font_name, :font_size, :bold, :italic
 
   def initialize(text, opts={})
     @text = text
-    @font_name = opts.key?(:font_name) ? opts[:font_name] : "Arial";
-    @font_size = opts.key?(:font_size) ? opts[:font_size] : 12;
+    @font_name = opts[:font_name] || "Arial";
+    @font_size = opts[:font_size] || 12;
+    @bold = opts[:bold] || false;
+    @italic = opts[:italic] || false;
   end
 
   def render
@@ -19,11 +21,11 @@ class Text < Shape
   end
 
   def slant
-    Cairo::FONT_SLANT_NORMAL
+    italic ? Cairo::FONT_SLANT_ITALIC : Cairo::FONT_SLANT_NORMAL
   end
 
   def weight
-    Cairo::FONT_WEIGHT_NORMAL
+    bold ? Cairo::FONT_WEIGHT_BOLD : Cairo::FONT_WEIGHT_NORMAL
   end
 
 
