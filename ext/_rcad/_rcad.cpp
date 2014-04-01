@@ -998,7 +998,12 @@ extern "C"
 void Init__rcad()
 {
     rb_cRenderedShape = define_class<TopoDS_Shape>("RenderedShape")
-        .define_method("_reversed", &rendered_shape__reversed);
+        .define_method("_reversed", &rendered_shape__reversed)
+        .define_singleton_method("_new_line2D", &_new_line2D)
+        .define_singleton_method("_new_curve2D", &_new_curve2D)
+        .define_singleton_method("_new_wire", &_new_wire)
+        .define_singleton_method("_new_face", &_new_face)
+        .define_singleton_method("_new_compound", &_new_compound);
 
     Data_Type<Standard_Failure> rb_cOCEError =
         define_class("OCEError", rb_eRuntimeError);
@@ -1024,12 +1029,7 @@ void Init__rcad()
         .add_handler<Standard_Failure>(translate_oce_exception)
         .define_method("write_stl", &shape_write_stl)
         .define_method("_bbox", &shape__bbox)
-        .define_singleton_method("from_stl", &shape_from_stl)
-        .define_singleton_method("_new_line2D", &_new_line2D)
-        .define_singleton_method("_new_curve2D", &_new_curve2D)
-        .define_singleton_method("_new_wire", &_new_wire)
-        .define_singleton_method("_new_face", &_new_face)
-        .define_singleton_method("_new_compound", &_new_compound);
+        .define_singleton_method("from_stl", &shape_from_stl);
 
     Class rb_cTransformedShape = define_class("TransformedShape", rb_cShape)
         .add_handler<Standard_Failure>(translate_oce_exception)

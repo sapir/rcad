@@ -15,7 +15,7 @@ class Text < Shape
   def render
     path = make_path
     wap = Text.path_to_wires_and_pts(path)
-    return Shape._new_compound(Text.group_wires_into_faces(wap))
+    return RenderedShape._new_compound(Text.group_wires_into_faces(wap))
   end
 
   def slant
@@ -61,21 +61,24 @@ class Text < Shape
 
       elsif instr.line_to?
         p = points[0]
-        cur_wire_edges << Shape._new_line2D(cur_pt, p) unless cur_pt == nil
+        if cur_pt != nil
+          cur_wire_edges << RenderedShape._new_line2D(cur_pt, p)
+        end
+
         cur_pt = p
 
       elsif instr.curve_to?
-        cur_wire_edges << Shape._new_curve2D([cur_pt] + points)
+        cur_wire_edges << RenderedShape._new_curve2D([cur_pt] + points)
         cur_pt = points[-1]
 
       elsif instr.close_path?
         if start_pt != nil and cur_pt != nil and start_pt != cur_pt
-          cur_wire_edges << Shape._new_line2D(cur_pt, start_pt)
+          cur_wire_edges << RenderedShape._new_line2D(cur_pt, start_pt)
           cur_pt = start_pt
         end
 
         if not cur_wire_edges.empty?
-          wire = Shape._new_wire(cur_wire_edges)
+          wire = RenderedShape._new_wire(cur_wire_edges)
           wires_and_pts << [wire, start_pt]
 
           # get ready for next wire
@@ -94,7 +97,7 @@ class Text < Shape
     # for each wire, set of wires it contains
     graph_a_contains_bs = Hash[
       wires_and_pts.map do |w,_|
-        f = Shape._new_face([w])
+        f = RenderedShape._new_face([w])
 
         contained = wires_and_pts
           .select {|_,p| _is_pnt2D_in_face(p, f)}
@@ -116,7 +119,7 @@ class Text < Shape
       end
 
     root_wires.map do |root|
-      Shape._new_face(Text.oriented_wires(
+      RenderedShape._new_face(Text.oriented_wires(
         root, graph_a_directly_contains_bs))
     end
   end
