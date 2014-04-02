@@ -34,18 +34,19 @@ class Text < Shape
   def make_path
     # actually, we want an in-memory surface, but it seems ruby-cairo
     # doesn't support that right now
-    surf = Cairo::SVGSurface.new("tmp.svg", 1024, 1024)
+    Cairo::SVGSurface.new("tmp.svg", 1024, 1024) do |surf|
+      Cairo::Context.new(surf) do |ctx|
+        ctx.select_font_face(font_name, slant, weight)
+        ctx.set_font_size(font_size)
 
-    ctx = Cairo::Context.new(surf)
-    ctx.select_font_face(font_name, slant, weight)
-    ctx.set_font_size(font_size)
+        ctx.new_path()
+        ctx.text_path(text)
+        # invert y direction, to match coordinates used for 3D
+        ctx.scale(1, -1)
 
-    ctx.new_path()
-    ctx.text_path(text)
-    # invert y direction, to match coordinates used for 3D
-    ctx.scale(1, -1)
-
-    ctx.copy_path()
+        return ctx.copy_path()
+      end
+    end
   end
 
   def Text.path_to_wires_and_pts(path)
