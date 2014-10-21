@@ -1,6 +1,6 @@
 require 'rcad'
 
-pedetal = add do
+pedestal = add do
   box = box(10.cm, 10.cm, 3.cm)
     .align(:xcenter, :ycenter, I)
 
